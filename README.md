@@ -1,4 +1,4 @@
-# CascadeCAD 0.6.0
+# CascadeCAD 1.0 Production (RX)
 
 ## Square capture and social sharing
 
@@ -16,7 +16,21 @@ The browser cannot force the operating-system share sheet to choose a particular
 
 CascadeCAD is a Python 3 Quart browser CAD editor built on CadQuery and Open CASCADE. XBF is the native project format; Three.js renders GLB previews locally in the browser.
 
-## CascadeCAD 0.6 editor additions
+## UUID collaboration and community
+
+CascadeCAD 0.7 adds a first production-tier collaboration protocol beside the CAD editor:
+
+- A typed CascadeCAD username receives a persistent `usr_...` UUID and a random device-session token.
+- The first username to activate collaboration on a project becomes its chat Owner. Owners and Admins invite existing usernames as Admin, Editor, Reviewer, or Viewer.
+- Private Project Chat is stored by project UUID and can link a message to the currently highlighted component UUIDs. Clicking the link reselects those parts in the editor.
+- Direct Messages provide private user-to-user text conversations.
+- The Global Broadcast Board is public text only, has an eight-second slow mode, a 500-character limit, 30-day retention, reporting, muting, and blocking. It never grants access to project files.
+- The global user list shows only active users who choose to be visible. Each user independently selects Available, Busy, or Invisible and chooses Hidden, Category Only, or Public Showcase for the active project. Hidden mode exposes only `Private project`; Category Only never exposes the project name or UUID.
+- Presence uses WebSockets plus a conservative heartbeat. The included one-worker Hypercorn deployment keeps live fan-out consistent, while messages and membership remain persistent on disk.
+
+The bundled UUID device session is deliberately separate from passwords. Before accepting paid customer data, place the same collaboration API behind passkeys, password/OAuth accounts, or enterprise SSO; rotate session tokens; add email verification and recovery; move identity/message metadata to PostgreSQL; use Redis for multi-web-worker presence; and retain TLS at the proxy. The current implementation is useful on a private or early commercial server, but it must not be presented as full account-security infrastructure.
+
+## CascadeCAD 0.6 editor foundation
 
 - Draggable two-row toolbars with Project, Share, Edit, Solids, Draft, Boolean, and Inspect groups.
 - Imperial/metric display and STEP export units.
@@ -93,7 +107,7 @@ The BREP and FCStd corrections create **faceted B-rep Part geometry** from trian
 The same guarded faceted-geometry limit used by STEP is applied to BREP and FCStd mesh-to-Part conversion:
 
 ```ini
-CASCADE_CAD_MAX_FACETED_STEP_TRIANGLES=750000
+CASCADE_CAD_MAX_FACETED_STEP_TRIANGLES=5000000
 CASCADE_CAD_STEP_EXPORT_TIMEOUT_SECONDS=3600
 CASCADE_CAD_FACETED_STEP_CHUNK_TRIANGLES=1000
 CASCADE_CAD_MAX_CSG_TRIANGLES=10000000
@@ -134,7 +148,7 @@ Open `https://lftr.biz/cascade-cad/` and force-refresh once after upgrade.
 curl -sS https://lftr.biz/cascade-cad/healthz | python3 -m json.tool
 ```
 
-The response advertises `validated_brep_export`, `part_based_fcstd_export`, `csg_separate_parts`, `faceted_xbf_conversion`, `hard_speed_faceted_conversion`, `fast_sewing`, `square_capture_share`, `automatic_downloads`, and `cancellable_exports`.
+The response advertises the geometry/export capabilities plus `collaboration.uuid_users`, `project_chat`, `direct_messages`, `global_presence`, `global_broadcast_board`, privacy modes, presence modes, and project roles.
 
 ## Mesh-to-solids assembly workflow
 
@@ -146,3 +160,52 @@ The editor also includes:
 - Draft tools: Line, B-spline, Polyline, Circle, Square/Rectangle, regular N-side polygon, and Ellipse.
 
 Closed draft profiles are stored as exact planar faces so they remain visible in the browser preview and can be consumed by Extrude, Revolve, Sweep, and Loft. Open lines, B-splines, and polylines are stored as exact edges/wires.
+
+## Large-model performance controls
+
+The large-model build exposes its important server controls in `/etc/cascade-cad.env`. Exact geometry remains unchanged; preview tolerance affects GLB tessellation, while the 5,000,000-triangle ceiling protects faceted conversion/export fallbacks.
+
+```ini
+CASCADE_CAD_PREVIEW_TOLERANCE=2.0
+CASCADE_CAD_PREVIEW_ANGULAR_TOLERANCE=0.30
+CASCADE_CAD_MAX_FACETED_STEP_TRIANGLES=5000000
+CASCADE_CAD_STEP_EXPORT_TIMEOUT_SECONDS=3600
+CASCADE_CAD_FACETED_STEP_CHUNK_TRIANGLES=1000
+CASCADE_CAD_MAX_CSG_TRIANGLES=10000000
+CASCADE_CAD_FACETED_WORKERS=2
+CASCADE_CAD_FACETED_QUEUE_DEPTH=60
+CASCADE_CAD_FACETED_MEMORY_BUDGET_GB=10
+CASCADE_CAD_FACETED_CACHE_ENABLED=1
+CASCADE_CAD_FACETED_CACHE_MAX_BYTES=21474836480
+CASCADE_CAD_FACETED_DIRECT_OCP=1
+CASCADE_CAD_FACETED_FREECAD_FALLBACK=1
+CASCADE_CAD_FACETED_UNIFY_SAME_DOMAIN=1
+```
+
+Run `sudo cascade-cad-diagnose` to print effective settings, service memory limits, logs, storage and OOM information.
+
+## Native FCStd import
+
+CascadeCAD 0.7.2 accepts `.FCStd` as an exact CAD source. FCStd files bypass the
+mesh reader and the `Reading Mesh Scene` stage. A separate FreeCAD console
+process opens the document, optionally recomputes it, exports final exact shape
+objects as temporary BREP, and CascadeCAD packs those objects into `master.xbf`
+with a GLB preview.
+
+The importer preserves the original FCStd file and records FreeCAD names,
+labels, type IDs, display colors, visibility, and readable source properties.
+Part Design bodies are imported from their final body result so intermediate
+Pad/Pocket/Fillet features are not duplicated.
+
+Settings in `/etc/cascade-cad.env`:
+
+```ini
+CASCADE_CAD_FCSTD_IMPORT_TIMEOUT_SECONDS=3600
+CASCADE_CAD_FCSTD_RECOMPUTE=1
+CASCADE_CAD_FCSTD_INCLUDE_HIDDEN=0
+```
+
+Documents that depend on third-party FreeCAD workbenches may require those same
+workbenches to be installed on the server. Missing external links or unsupported
+custom objects are reported by the import job rather than being silently routed
+through the mesh importer.

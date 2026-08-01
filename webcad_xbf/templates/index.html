@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CascadeCAD — Exact CAD and Mesh Workspace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=0.7.2">
+</head>
+<body class="home"
+      data-base-path="{{ base_path }}"
+      data-max-upload-bytes="{{ max_upload_bytes }}"
+      data-chunk-bytes="{{ chunk_bytes }}">
+  <main class="home-shell">
+    <section class="hero">
+      <p class="eyebrow">CascadeCAD · OPEN CASCADE · QUART · WEBGL</p>
+      <h1>Make Solid(s) from Mesh — Even in Assemblies</h1>
+      <p class="lede">Upload an FCStd project, STEP model, XBF project, mesh, or multi-part assembly; preserve its structure, convert closed mesh shells into faceted B-rep solids, and export the result as XBF, STEP, BREP, or FCStd.</p>
+    </section>
+
+    <section class="upload-card">
+      <h2>Upload FCStd, exact CAD, or mesh assemblies</h2>
+      <label>Project name <input id="project-name" placeholder="Full truck" autocomplete="off"></label>
+      <label class="drop-zone" id="drop-zone">
+        <input id="file-input" type="file" accept=".fcstd,.xbf,.step,.stp,.stl,.obj,.glb,.gltf,.ply,.3mf">
+        <strong>Choose or drop an FCStd, XBF, STEP, mesh, or assembly</strong>
+        <span>Large files upload in retryable {{ (chunk_bytes / 1048576)|int }} MB chunks.</span>
+        <span id="chosen-file" class="chosen-file">No file selected</span>
+      </label>
+      <label class="option-check">
+        <input id="mesh-cleanup" type="checkbox" checked>
+        <span><b>Clean mesh before conversion</b><small>For 3MF, remove exact coincident objects. For other meshes, remove duplicate faces and unused vertices. No decimation.</small></span>
+      </label>
+      <div class="format-grid">
+        <div><b>FCStd / XBF / STEP</b><span>Exact solids and assemblies; FCStd preserves names, colors, and source properties</span></div>
+        <div><b>STL / OBJ / GLB / 3MF</b><span>Assembly parts are preserved, then can be converted to faceted solids</span></div>
+      </div>
+      <button id="upload-button" type="button" disabled>Create solid-conversion project</button>
+      <div id="upload-status" class="status" hidden>
+        <div class="progress"><i id="progress-bar"></i></div>
+        <p id="status-message"></p>
+      </div>
+      <p class="warning"><b>Main workflow:</b> mesh uploads first preserve every triangle and assembly part in XBF. In the editor, use <b>Convert to Tessellated (Faceted) Solids</b> to replace closed mesh shells with genuine faceted B-rep solids while retaining unavoidable open shells. Exact B-rep parts remain exact; analytic curves and parametric history are not invented.</p>
+    </section>
+
+    <section class="projects-card">
+      <header>
+        <h2>Projects</h2>
+        <div class="project-list-actions">
+          <button id="refresh-projects" type="button" class="secondary">Refresh</button>
+          <button id="delete-project" type="button" class="danger" disabled>Delete selected</button>
+        </div>
+      </header>
+      <p class="small-copy">Click a project to highlight it. Double-click it, or use Open, to enter the editor.</p>
+      <div id="projects" class="project-list"><p>Loading…</p></div>
+    </section>
+  </main>
+  <script type="module" src="{{ url_for('static', filename='js/index.js') }}?v=0.7.2"></script>
+</body>
+</html>
