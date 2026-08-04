@@ -1,0 +1,17 @@
+[Unit]
+Description=LFTR Broadcast Marine Intelligence Globe
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=${APP_DIR}
+EnvironmentFile=-${APP_DIR}/.env
+EnvironmentFile=-/etc/broadcast/install.env
+ExecStart=${APP_DIR}/.venv/bin/python -m app.main
+Restart=always
+RestartSec=5
+User=${APP_USER}
+Group=${APP_GROUP}
+
+[Install]
+WantedBy=multi-user.target

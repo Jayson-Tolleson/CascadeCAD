@@ -1,0 +1,47 @@
+[Unit]
+Description=CascadeCAD Open CASCADE geometry worker
+After=cascade-cad.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=cascadecad
+Group=cascadecad
+WorkingDirectory=/opt/cascade-cad
+EnvironmentFile=-/etc/cascade-cad.env
+Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/var/lib/cascade-cad
+Environment=XDG_CONFIG_HOME=/var/lib/cascade-cad/.config
+Environment=MALLOC_ARENA_MAX=2
+Environment=OMP_NUM_THREADS=1
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=MKL_NUM_THREADS=1
+Environment=NUMEXPR_NUM_THREADS=1
+ExecStartPre=/opt/cascade-cad/.venv/bin/python /opt/cascade-cad/scripts/check_runtime.py --quiet
+ExecStart=/usr/bin/nice -n 10 /opt/cascade-cad/.venv/bin/python -m webcad_xbf.worker
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/cascade-cad
+CPUWeight=50
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+
+# Keep a large conversion from taking down the whole 16 GB E2 VM. The worker
+# can use most of the machine, but Hypercorn, nginx and the kernel retain room.
+MemoryHigh=9G
+MemoryMax=12G
+MemorySwapMax=2G
+OOMPolicy=continue
+KillMode=mixed
+TimeoutStopSec=30
+TasksMax=512
+OOMScoreAdjust=500
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

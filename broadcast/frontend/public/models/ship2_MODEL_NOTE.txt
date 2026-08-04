@@ -1,0 +1,2 @@
+ship2.gltf was supplied by the user and is referenced by the Boats pill as /models/ship2.gltf.
+The uploaded glTF references an external buffer URI named ship2.bin. If ship2.bin is not present next to this file on the server, Google Model3D may fall back to the polygon hull/hazard visuals.

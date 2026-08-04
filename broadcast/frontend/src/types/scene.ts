@@ -1,0 +1,2 @@
+export interface SceneSnapshot { ok: boolean; scene_id: string; generated_at: string; bbox: { west: number; south: number; east: number; north: number }; viewport: { latitude: number; longitude: number; altitudeM: number; heading: number; tilt: number }; layers: SceneLayer[]; spatial: Record<string, unknown>; fields: Record<string, unknown>; }
+export interface SceneLayer { id: string; label: string; enabled: boolean; kind: 'field' | 'entity' | 'report'; }

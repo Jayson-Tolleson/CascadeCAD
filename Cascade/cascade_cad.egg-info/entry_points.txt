@@ -1,0 +1,4 @@
+[console_scripts]
+cascade-cad-maintenance = webcad_xbf.maintenance:main
+cascade-cad-sample = webcad_xbf.sample:main
+cascade-cad-worker = webcad_xbf.worker:main

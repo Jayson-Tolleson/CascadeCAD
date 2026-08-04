@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","properties":{"id":"fixture_socal_reservoir","name":"Fixture SoCal Reservoir","kind":"reservoir","area_km2":1.2},"geometry":{"type":"Polygon","coordinates":[[[-118.45,34.10],[-118.42,34.10],[-118.42,34.13],[-118.45,34.13],[-118.45,34.10]]] }},
+    {"type":"Feature","properties":{"id":"fixture_florida_lake","name":"Fixture Florida Lake","kind":"lake","area_km2":3.5},"geometry":{"type":"Polygon","coordinates":[[[-80.90,26.88],[-80.82,26.88],[-80.82,26.96],[-80.90,26.96],[-80.90,26.88]]] }},
+    {"type":"Feature","properties":{"id":"fixture_generic_pond","name":"Unnamed Fixture Pond","kind":"pond","area_km2":0.04},"geometry":{"type":"Polygon","coordinates":[[[-120.10,35.10],[-120.08,35.10],[-120.08,35.12],[-120.10,35.12],[-120.10,35.10]]] }}
+  ]
+}
