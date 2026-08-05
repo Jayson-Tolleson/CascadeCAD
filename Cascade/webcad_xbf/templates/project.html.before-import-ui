@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="en" data-theme-mode="light" data-theme-resolved="light">
 <head>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js"
+      }
+    }
+  </script>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ project.name }} · CascadeCAD Editor</title>
@@ -74,13 +82,7 @@
             </select>
             <label class="export-selection"><input id="export-selected-only" type="checkbox" disabled><span>Selected</span></label>
             <label class="export-selection fast-render-option"><input id="fast-render" type="checkbox"><span>Fast render (FastSewing)</span></label>
-            
-<button id="import-model-btn"
-        type="button"
-        class="primary-action">
-  Import CAD
-</button>
-<button id="export-button" type="button" class="primary-action">Export</button>
+            <button id="export-button" type="button" class="primary-action">Export</button>
             <button id="convert-faceted-solids" type="button">Faceted Solids</button>
             <button id="cancel-job" type="button" class="danger" hidden>Cancel</button>
           </div>
@@ -327,72 +329,68 @@
       <footer><button value="cancel" type="button" id="cancel-collaboration-profile" class="secondary">Cancel</button><button value="default" type="submit" class="primary-action">Enter CascadeCAD</button></footer>
     </form>
   </dialog>
-  
-<dialog id="import-dialog" class="model-dialog">
-  <form method="dialog" class="model-shell">
+  <div id="toast" class="toast" hidden></div>
+  <script type="module" defer src="{{ url_for('static', filename='js/project-bootstrap.js') }}?v=0.7.0-collaboration"></script>
 
-    <header>
-      <div>
-        <h2>Import CAD Model</h2>
-        <p>Universal CAD import pipeline</p>
-      </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const totalPixels = 50;
+        const pixelContainer = document.getElementById('pixel-container');
+        if (!pixelContainer) return;
+        
+        const pixels = [];
+        for (let i = 0; i < totalPixels; i++) {
+            const pixel = document.createElement('div');
+            pixel.classList.add('pixel-light');
+            pixelContainer.appendChild(pixel);
+            pixels.push(pixel);
+        }
 
-      <button value="cancel"
-              class="icon-button">
-        ×
-      </button>
-    </header>
+        function getPixelColor(index, total) {
+            const ratio = index / total;
+            if (ratio < 0.35) return '#ff4d4d'; // Red
+            if (ratio < 0.70) return '#ffcc00'; // Yellow
+            return '#28a745'; // Green
+        }
 
-    <div class="model-fields">
+        window.runImportProgressSimulation = function(onComplete) {
+            const btn = document.getElementById('import-model-btn');
+            if (btn) btn.disabled = true;
+            
+            pixels.forEach(p => {
+                p.style.backgroundColor = '#e0e0e0';
+                p.classList.remove('active');
+            });
 
-      <label>
-        Select CAD file
-        <input id="cad-import-file"
-               type="file"
-               accept=".step,.stp,.iges,.igs,.brep,.stl,.obj,.ply,.glb,.fcstd,.xbf">
-      </label>
+            let current = 0;
+            const timer = setInterval(() => {
+                if (current < totalPixels) {
+                    if (current > 0) pixels[current - 1].classList.remove('active');
+                    pixels[current].style.backgroundColor = getPixelColor(current, totalPixels);
+                    pixels[current].classList.add('active');
+                    current++;
+                } else {
+                    clearInterval(timer);
+                    if (pixels.length > 0) pixels[pixels.length - 1].classList.remove('active');
+                    if (btn) btn.disabled = false;
+                    if (typeof onComplete === 'function') onComplete();
+                }
+            }, 60);
+        };
 
-      <p class="small-copy">
-        Supported:
-        FCStd · STEP · IGES · BREP · STL · OBJ · GLTF
-      </p>
-
-      <div id="import-progress-panel">
-        <p id="import-stage">
-          Waiting for file...
-        </p>
-
-        <div id="pixel-container"></div>
-      </div>
-
-    </div>
-
-    <footer>
-      <button value="cancel"
-              type="button"
-              class="secondary">
-        Cancel
-      </button>
-
-      <button id="start-import"
-              type="button"
-              class="primary-action">
-        Import
-      </button>
-    </footer>
-
-  </form>
-</dialog>
-
-<div id="toast" class="toast" hidden></div>
-
-    <script defer src="{{ url_for('static', filename='js/viewport.js') }}?v=1"></script>
-    <script defer src="{{ url_for('static', filename='js/ui_core.js') }}?v=2"></script>
-
-<script defer src="{{ url_for('static', filename='js/project-bootstrap.js') }}?v=0.7.0-collaboration"></script>
-<script defer src="{{ url_for('static', filename='js/import/import_progress.js') }}"></script>
-<script defer src="{{ url_for('static', filename='js/import/import_dialog.js') }}"></script>
-<script defer src="{{ url_for('static', filename='js/import/import_manager.js') }}"></script>
+        const importBtn = document.getElementById('import-model-btn');
+        if (importBtn) {
+            importBtn.addEventListener('click', () => {
+                const projectName = prompt('Enter project name for import:', 'Imported Assembly');
+                if (!projectName) return;
+                window.runImportProgressSimulation(() => {
+                    // Trigger your upload/import handler here
+                    console.log('Import progress completed for:', projectName);
+                });
+            });
+        }
+    });
+</script>
 </body>
 
 </html>

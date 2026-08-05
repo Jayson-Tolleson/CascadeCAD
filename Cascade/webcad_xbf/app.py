@@ -9,6 +9,10 @@ from uuid import uuid4
 from quart import Quart, abort, jsonify, redirect, render_template, request, send_file, websocket
 
 from .config import Settings
+
+def unit_options():
+    return [{"label": "Imperial (inches / pounds)", "value": "imperial"}, {"label": "Metric (millimeters / kilograms)", "value": "metric"}]
+
 from .store import ALLOWED_EXTENSIONS, Store, safe_filename
 from .share_media import cleanup_share_media, normalize_share_image, normalize_share_video
 from .collaboration import register_collaboration_routes
@@ -207,7 +211,7 @@ def create_app() -> Quart:
         size = int(payload.get("size", 0))
         name = str(payload.get("project_name", "")).strip()
         suffix = Path(filename).suffix.lower()
-        if suffix not in ALLOWED_EXTENSIONS:
+        if suffix not in ['.step', '.stp', '.iges', '.igs', '.brep', '.stl', '.obj', '.gltf', '.glb', '.fcstd', '.xbf', 'step', 'stp', 'iges', 'igs', 'brep', 'stl', 'obj', 'gltf', 'glb', 'fcstd', 'xbf']:
             return jsonify({"error": f"Unsupported file type: {suffix}"}), 400
         if size <= 0 or size > settings.max_upload_bytes:
             return jsonify({"error": "File size is outside the configured limit"}), 400
@@ -680,3 +684,39 @@ def create_app() -> Quart:
 
 
 app = create_app()
+
+
+# --- Background Worker Lifespan Loop ---
+import asyncio
+from .config import Settings
+from .store import Store
+from .worker import run_job
+
+async def _bg_worker_loop():
+    settings = Settings.from_env()
+    store = Store(settings.storage)
+    poll_sec = getattr(settings, "worker_poll_seconds", 2) or 2
+    app.logger.info("[+] Background worker loop initialized.")
+
+    while True:
+        try:
+            jobs = await asyncio.to_thread(store.queued_jobs)
+            for job in jobs:
+                app.logger.info(f"[+] Processing job {job['id']}...")
+                await asyncio.to_thread(run_job, store, settings, job)
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            app.logger.error(f"[!] Worker task error: {e}")
+
+        await asyncio.sleep(poll_sec)
+
+@app.while_serving
+async def lifespan():
+    worker_task = asyncio.create_task(_bg_worker_loop())
+    yield
+    worker_task.cancel()
+    try:
+        await worker_task
+    except asyncio.CancelledError:
+        pass

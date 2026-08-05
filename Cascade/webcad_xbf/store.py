@@ -13,7 +13,7 @@ from .editor import apply_batch_operation, component_list, migrate_state, new_st
 
 _ID_RE = re.compile(r"^[a-zA-Z0-9_-]{8,80}$")
 _SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._ -]+")
-ALLOWED_EXTENSIONS = {".xbf", ".step", ".stp", ".fcstd", ".stl", ".obj", ".glb", ".gltf", ".ply", ".3mf"}
+ALLOWED_EXTENSIONS = {'step', 'stp', 'iges', 'igs', 'brep', 'stl', 'obj', 'ply', 'glb', 'fcstd', 'xbf'}
 
 
 def safe_filename(name: str) -> str:

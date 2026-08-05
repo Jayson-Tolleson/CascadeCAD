@@ -122,12 +122,12 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
 function appPath(path) {
-    if (!path) return "/CascadeCAD/";
-    while (path.includes("/CascadeCAD/CascadeCAD/")) {
-        path = path.replace("/CascadeCAD/CascadeCAD/", "/CascadeCAD/");
+    if (!path) return "/cascade-cad/";
+    while (path.includes("/cascade-cad/cascade-cad/")) {
+        path = path.replace("/cascade-cad/cascade-cad/", "/cascade-cad/");
     }
-    if (path.startsWith("/CascadeCAD/")) return path;
-    return "/CascadeCAD" + (path.startsWith("/") ? "" : "/") + path;
+    if (path.startsWith("/cascade-cad/")) return path;
+    return "/cascade-cad" + (path.startsWith("/") ? "" : "/") + path;
 }
 
 function notify(text, timeout = 5000) {

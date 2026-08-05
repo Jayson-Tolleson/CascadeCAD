@@ -29,7 +29,7 @@
       <h2>Upload FCStd, exact CAD, or mesh assemblies</h2>
       <label>Project name <input id="project-name" placeholder="Full truck" autocomplete="off"></label>
       <label class="drop-zone" id="drop-zone">
-        <input id="file-input" type="file" accept=".fcstd,.xbf,.step,.stp,.stl,.obj,.glb,.gltf,.ply,.3mf">
+        <input id="file-input" type="file" accept=".step,.stp,.iges,.igs,.brep,.stl,.obj,.ply,.glb,.fcstd,.xbf">
         <strong>Choose or drop an FCStd, XBF, STEP, mesh, or assembly</strong>
         <span>Large files upload in retryable {{ (chunk_bytes / 1048576)|int }} MB chunks.</span>
         <span id="chosen-file" class="chosen-file">No file selected</span>

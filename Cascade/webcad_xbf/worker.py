@@ -53,8 +53,9 @@ def run_job(store: Store, settings: Settings, job: dict) -> None:
                 progress=progress,
                 cleanup_mesh=bool(job.get("payload", {}).get("mesh_cleanup", False)),
             )
-            store.update_project(project_id, status="ready", **result)
-            store.reset_editor(project_id, result["components"])
+            result_status = result.pop("status", "ready")
+            store.update_project(project_id, status=result_status, **result)
+            store.reset_editor(project_id, result.get("components", []))
 
         elif operation == "commit_edits":
             manifest = store.get_project(project_id)
