@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ project.name }} · CascadeCAD Editor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=0.7.0-collaboration">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cascade_ui.css') }}">
     <style>
         #import-model-btn {
             background-color: #007bff !important;
@@ -385,9 +385,11 @@
 </dialog>
 
 <div id="toast" class="toast" hidden></div>
-  <script defer src="{{ url_for('static', filename='js/project-bootstrap.js') }}?v=0.7.0-collaboration"></script>
 
+    <script defer src="{{ url_for('static', filename='js/viewport.js') }}?v=1"></script>
+    <script defer src="{{ url_for('static', filename='js/ui_core.js') }}?v=2"></script>
 
+<script defer src="{{ url_for('static', filename='js/project-bootstrap.js') }}?v=0.7.0-collaboration"></script>
 <script defer src="{{ url_for('static', filename='js/import/import_progress.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/import/import_dialog.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/import/import_manager.js') }}"></script>

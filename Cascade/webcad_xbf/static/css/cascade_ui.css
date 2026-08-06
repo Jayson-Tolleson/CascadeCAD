@@ -1,0 +1,130 @@
+/**
+ * CascadeCAD Professional UI Styles
+ * Implements dockable panels, assembly tree selection states, and color-coded SVG toolbars.
+ */
+
+:root {
+    /* Colorz - Toolbar Group Accents */
+    --color-geometry: #3b82f6;  /* Blue */
+    --color-modifier: #f59e0b;  /* Amber */
+    --color-analysis: #10b981;  /* Emerald */
+    --color-system:   #6b7280;  /* Gray */
+    
+    /* UI Theme */
+    --bg-main: #111827;
+    --bg-panel: #1f2937;
+    --bg-hover: #374151;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+    --select-bg: #2563eb;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Toolbar Redesign */
+.cascade-toolbar {
+    display: flex;
+    padding: 0.5rem;
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    gap: 1rem;
+}
+
+.tool-group {
+    display: flex;
+    gap: 0.25rem;
+    padding-right: 1rem;
+    border-right: 1px solid var(--border-color);
+}
+
+.tool-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.tool-btn:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--text-muted);
+}
+
+.tool-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* SVG Color Coding */
+.tool-group.geometry .tool-btn svg { fill: var(--color-geometry); }
+.tool-group.modifier .tool-btn svg { fill: var(--color-modifier); }
+.tool-group.analysis .tool-btn svg { fill: var(--color-analysis); }
+
+/* Dockable Panels */
+.cascade-workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.dock-panel {
+    background-color: var(--bg-panel);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    min-width: 250px;
+    resize: horizontal;
+    overflow: hidden;
+}
+
+.dock-header {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: #1a222c;
+    border-bottom: 1px solid var(--border-color);
+    cursor: grab;
+}
+
+/* Assembly Tree Improvements */
+.assembly-tree {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+    list-style: none;
+    margin: 0;
+}
+
+.tree-node {
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    user-select: none;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tree-node:hover {
+    background-color: var(--bg-hover);
+}
+
+.tree-node.selected {
+    background-color: var(--select-bg);
+    color: white;
+}

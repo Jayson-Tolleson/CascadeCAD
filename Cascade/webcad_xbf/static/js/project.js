@@ -146,7 +146,14 @@ async function getJson(url, options = {}) {
     headers: {Accept: 'application/json', ...(options.headers || {})},
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
+  let data;
+try {
+  data = await response.json();
+} catch (e) {
+  data = { error: await response.text() };
+}
+
+if (!response.ok) {
     const error = new Error(data.error || `${response.status} ${response.statusText}`);
     error.status = response.status;
     throw error;
@@ -155,8 +162,7 @@ async function getJson(url, options = {}) {
 }
 
 function escapeHtml(value) {
-  return String(value).replace(/[&<>'"]/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  return String(value !== null && value !== undefined ? value : "");', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
   }[char]));
 }
 
@@ -225,7 +231,8 @@ function updateRendererDiagnostics() {
   const render = renderer.info.render || {};
   const triangles = model?.userData?.totalTriangleCount || render.triangles || 0;
   const heap = performance?.memory?.usedJSHeapSize ? `${(performance.memory.usedJSHeapSize / 1048576).toFixed(0)} MB heap` : 'CPU n/a';
-  diagnosticsOverlay.textContent = `FPS ${currentFps.toFixed(0)} · Triangles ${Number(triangles).toLocaleString()} · GPU geom ${memory.geometries || 0} tex ${memory.textures || 0} · ${heap} · Draw calls ${render.calls || 0}`;
+  // diagnosticsOverlay.textContent = `FPS ${currentFps.toFixed(0)} · Triangles ${Number(triangles).toLocaleString()} · GPU geom ${memory.geometries || 0} tex ${memory.textures || 0} · ${heap} · Draw calls ${render.calls || 0}`;
+    if(diagnosticsOverlay) diagnosticsOverlay.style.display = 'none';
 }
 
 function stopInteractionRender() {
@@ -256,7 +263,7 @@ function resolutionPixelRatio() {
 }
 
 function normalizeName(value) {
-  return String(value || '').trim().replace(/[^A-Za-z0-9._-]+/g, '_');
+  return String(value !== null && value !== undefined ? value : "");
 }
 
 function resolveTheme(value) {
@@ -373,6 +380,7 @@ function disposeModel() {
 
 function fitView(target = model) {
   if (!target) return;
+  target.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(target);
   if (box.isEmpty()) return;
   const size = box.getSize(new THREE.Vector3());
@@ -390,9 +398,18 @@ function fitView(target = model) {
 async function loadPreview() {
   disposeModel();
   const loader = new GLTFLoader();
-  const revision = encodeURIComponent(currentProject?.revision_id || currentProject?.updated_at || 'current');
-  const gltf = await loader.loadAsync(appPath(`/api/projects/${projectId}/preview?rev=${revision}`));
-  model = gltf.scene;
+  let gltf;
+  try {
+    const modelUrl = appPath(`/api/projects/${projectId}/preview?rev=${revision}`);
+    console.log(`[GLB Diagnostics] 📡 Fetching model from: ${modelUrl}`);
+    
+    gltf = await loader.loadAsync(modelUrl);
+    model = gltf.scene;
+    
+    console.log(`[GLB Diagnostics] ✅ Success! Loaded ${model.children.length} root nodes.`);
+  } catch (err) {
+    console.error('[GLB Diagnostics] ❌ FATAL ERROR loading GLB:', err);
+  }
   prepareRenderableModel(model);
   scene.add(model);
   indexComponentNodes();

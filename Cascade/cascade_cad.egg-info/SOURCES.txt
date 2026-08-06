@@ -39,12 +39,16 @@ webcad_xbf/share_media.py
 webcad_xbf/store.py
 webcad_xbf/units.py
 webcad_xbf/worker.py
+webcad_xbf/importers/__init__.py
+webcad_xbf/importers/manager.py
 webcad_xbf/static/css/app.css
 webcad_xbf/static/js/collaboration.js
 webcad_xbf/static/js/index.js
 webcad_xbf/static/js/project-bootstrap.js
 webcad_xbf/static/js/project.js
 webcad_xbf/static/js/share-capture.js
+webcad_xbf/static/js/ui_core.js
+webcad_xbf/static/js/viewport.js
 webcad_xbf/static/vendor/three/BufferGeometryUtils.js
 webcad_xbf/static/vendor/three/GLTFLoader.js
 webcad_xbf/static/vendor/three/OrbitControls.js

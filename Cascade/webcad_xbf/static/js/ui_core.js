@@ -14,8 +14,8 @@ const CascadeCAD = {
     },
 
     cacheDOM() {
-        this.aiInput = document.getElementById('ai-prompt-input');
-        this.aiBtn = document.getElementById('ai-generate-btn');
+        this.aiInput = (document.getElementById('ai-prompt-input') || { value: '' });
+        this.aiBtn = (document.getElementById('ai-generate-btn') || { addEventListener: function(){}, innerHTML: '' });
         this.fileInput = document.getElementById('cad-file-input');
         this.userModal = document.getElementById('user-modal');
         this.toast = document.getElementById('toast');
