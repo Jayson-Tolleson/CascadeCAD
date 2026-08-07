@@ -43,7 +43,7 @@ def read_json(path: Path) -> dict[str, Any]:
 
 
 class Store:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path = Path("/home/jayson_tolleson/Cascade/projects")):
         self.root = root
         self.projects = root / "projects"
         self.uploads = root / "uploads"

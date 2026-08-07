@@ -1,0 +1,38 @@
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}}
+
+location /ws/ {{
+    proxy_pass http://127.0.0.1:8790/ws/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}}
+
+location /api/ {{
+    proxy_pass http://127.0.0.1:8790/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}}
+"""
+
+    try:
+        with open("/tmp/cascade-cad.conf", "w", encoding="utf-8") as f:
+            f.write(nginx_snippet)
+        
+        os.system("sudo cp /tmp/cascade-cad.conf /etc/nginx/snippets/cascade-cad.conf")
+        os.system("sudo nginx -t")
+        os.system("sudo systemctl reload nginx")
+        print("✅ Nginx configuration successfully updated with clean root & try_files directive!")
+    except Exception as e:
+        print(f"⚠️ Error updating Nginx: {e}")
+
+if __name__ == "__main__":
+    update_nginx_clean()

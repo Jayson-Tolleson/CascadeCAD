@@ -1,6 +1,6 @@
 console.log("🌌 Viewport Engine Initializing...");
 
-let scene, camera, renderer, controls;
+if (typeof scene === 'undefined') { var scene, camera, renderer, controls; }
 
 function initViewport() {
     const container = document.getElementById('viewport-container');

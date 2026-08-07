@@ -20,8 +20,8 @@ document.getElementById("start-import")
 ?.addEventListener("click", () => {
 
 const file =
-document.getElementById("cad-import-file")
-.files[0];
+(document.getElementById("cad-import-file")
+.files || {})[0];
 
 
 if (!file) {

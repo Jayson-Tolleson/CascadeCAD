@@ -1,0 +1,16 @@
+{
+  "messages": [
+    {
+      "channel": "direct",
+      "created_at": 1786014854.7147484,
+      "id": "msg_de5959989bc247dabe8ccee73991b37c",
+      "kind": "user",
+      "recipient_user_id": "usr_22d7daebfe614002a906abcf832f8f60",
+      "text": "hey my man",
+      "user_id": "usr_68c2f831f54646d4ade512411b856cf0",
+      "username": "Jayson Tolleson"
+    }
+  ],
+  "updated_at": 1786014854.7148201,
+  "version": 1
+}

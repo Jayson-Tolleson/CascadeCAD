@@ -1,0 +1,28 @@
+{
+  "created_at": 1786014158.1631415,
+  "members": {
+    "usr_22d7daebfe614002a906abcf832f8f60": {
+      "invited_by": "usr_22d7daebfe614002a906abcf832f8f60",
+      "joined_at": 1786014158.163146,
+      "role": "owner"
+    },
+    "usr_28c798f41bff4a6eb2ae2e584f6b109a": {
+      "invited_by": "usr_28c798f41bff4a6eb2ae2e584f6b109a",
+      "joined_at": 1786014761.0181792,
+      "role": "owner"
+    },
+    "usr_68c2f831f54646d4ade512411b856cf0": {
+      "invited_by": "usr_68c2f831f54646d4ade512411b856cf0",
+      "joined_at": 1786014822.7655172,
+      "role": "owner"
+    },
+    "usr_ce7c95d60012421c8031ef7db6e837d0": {
+      "invited_by": "usr_ce7c95d60012421c8031ef7db6e837d0",
+      "joined_at": 1786014970.221755,
+      "role": "owner"
+    }
+  },
+  "project_id": "prj_cascade_v1",
+  "updated_at": 1786015011.2177064,
+  "version": 1
+}

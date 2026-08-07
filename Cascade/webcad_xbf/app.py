@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from tools.doctor_repo import report
 import os
 from pathlib import Path
 from quart import Quart, jsonify, render_template, request
@@ -37,6 +43,16 @@ def create_app() -> Quart:
             "service": "CascadeCAD Server",
             "version": "1.0.0"
         }), 200
+    @app.route("/doctor")
+    async def doctor():
+        return await render_template("doctor.html")
+
+    @app.route("/api/doctor/repository")
+    async def doctor_repository():
+        return jsonify(report())
+
+
+
 
     return app
 

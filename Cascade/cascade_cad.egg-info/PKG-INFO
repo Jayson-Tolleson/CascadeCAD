@@ -14,6 +14,7 @@ Requires-Dist: trimesh<5,>=4.6
 Requires-Dist: networkx<4,>=3.4
 Requires-Dist: numpy<3,>=2.0
 Requires-Dist: lxml<7,>=5
+Requires-Dist: Pillow>=10.0.0
 Requires-Dist: pillow<13,>=10
 Provides-Extra: test
 Requires-Dist: pytest<10,>=8; extra == "test"

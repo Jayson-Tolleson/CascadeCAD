@@ -2,8 +2,8 @@
   var viewer = document.querySelector('#viewer');
   var message = viewer ? viewer.querySelector('.viewer-message') : null;
   var moduleUrl = document.body.dataset.projectModule;
-  var basePath = String(document.body.dataset.basePath || '').replace(/\/$/, '');
-  var version = '0.7.0';
+  var basePath = String(document.body.dataset.basePath || '').replace(/\$/, '');
+  var version = '0.7.5';
   var themeKey = 'cascade-cad-editor-theme';
 
   function resolveTheme(value) {
@@ -25,46 +25,56 @@
   }
 
   async function verifyModule(label, relativeUrl) {
-    var url = basePath + '/static/' + relativeUrl + '?v=' + version;
-    var response;
+    if (!relativeUrl) return '';
+    var cleanPath = relativeUrl.split('?')[0];
+    var url = basePath + '/static/' + cleanPath + "?v=" + version;
+    
     try {
-      response = await fetch(url, {cache: 'reload', credentials: 'same-origin'});
-    } catch (error) {
-      throw new Error(label + ' could not be fetched: ' + error.message);
-    }
-    var contentType = response.headers.get('content-type') || 'missing content type';
-    if (!response.ok) {
-      throw new Error(label + ' returned HTTP ' + response.status + ' at ' + url);
-    }
-    if (!/(javascript|ecmascript)/i.test(contentType)) {
-      throw new Error(label + ' has invalid MIME type ' + contentType + ' at ' + url);
-    }
-    try {
-      await import(url);
-    } catch (error) {
-      throw new Error(label + ' (' + relativeUrl + ') syntax error: ' + error.message);
+      var response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/javascript, */*' } });
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status + ' (' + response.statusText + ')');
+      }
+      return url;
+    } catch (err) {
+      throw new Error('Failed to load ' + label + ' (' + url + '): ' + err.message);
     }
   }
 
   async function start() {
-    if (!moduleUrl) throw new Error('project module URL is missing');
-    var dependencies = [
-      ['Three.js core', './vendor/three/three.core.js'],
-      ['Three.js WebGL module', './vendor/three/three.module.js'],
-      ['OrbitControls', './vendor/three/OrbitControls.js'],
-      ['TransformControls', './vendor/three/TransformControls.js'],
-      ['BufferGeometryUtils', './vendor/three/BufferGeometryUtils.js'],
-      ['GLTFLoader', './vendor/three/GLTFLoader.js']
-    ];
-    for (var i = 0; i < dependencies.length; i++) {
-      await verifyModule(dependencies[i][0], dependencies[i][1]);
-    }
     try {
-      await import(moduleUrl);
+      if (message) {
+        message.textContent = 'Initializing CascadeCAD editor...';
+      }
+
+      await verifyModule('Viewport Module', 'js/viewport.js');
+      await verifyModule('UI Core Module', 'js/ui_core.js');
+      await verifyModule('Collaboration Module', 'js/collaboration.js');
+      await verifyModule('Share Capture Module', 'js/share-capture.js');
+
+      if (!moduleUrl) {
+        throw new Error('No project module specified.');
+      }
+      var rawModule = moduleUrl || 'js/project.js';
+      // Strip any query strings, encoded characters, and leading static/slash prefixes
+      var cleanModulePath = decodeURIComponent(rawModule).split('?')[0].replace(/^(\/static\/|static\/|\/+)/, '');
+      var resolvedModuleUrl = basePath + '/static/' + cleanModulePath + "?v=" + version;
+
+      if (message) {
+        message.textContent = 'Loading project module...';
+      }
+
+      await import(resolvedModuleUrl);
+      if (message) {
+        message.style.display = 'none';
+      }
     } catch (error) {
-      throw new Error('Main project module syntax error: ' + error.message);
+      showFailure(error);
     }
   }
 
-  start().catch(showFailure);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
 })();

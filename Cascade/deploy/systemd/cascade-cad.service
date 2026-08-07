@@ -5,21 +5,20 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=cascadecad
-Group=cascadecad
-WorkingDirectory=/opt/cascade-cad
-EnvironmentFile=-/etc/cascade-cad.env
+User=jayson_tolleson
+Group=jayson_tolleson
+WorkingDirectory=/home/jayson_tolleson/Cascade
 Environment=PYTHONUNBUFFERED=1
-Environment=HOME=/var/lib/cascade-cad
-Environment=XDG_CONFIG_HOME=/var/lib/cascade-cad/.config
-ExecStart=/opt/cascade-cad/.venv/bin/hypercorn --bind ${CASCADE_CAD_HOST}:${CASCADE_CAD_PORT} --workers 1 --keep-alive 20 webcad_xbf.app:app
+Environment=HOME=/home/jayson_tolleson
+Environment=XDG_CONFIG_HOME=/home/jayson_tolleson/.config
+ExecStart=/home/jayson_tolleson/Cascade/venv/bin/hypercorn --bind 127.0.0.1:8790 --workers 1 --keep-alive 20 webcad_xbf.app:app
 Restart=always
 RestartSec=3
 NoNewPrivileges=true
 PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/var/lib/cascade-cad
+ProtectSystem=full
+ProtectHome=false
+ReadWritePaths=/home/jayson_tolleson/Cascade
 MemoryHigh=1G
 MemoryMax=1536M
 OOMPolicy=continue

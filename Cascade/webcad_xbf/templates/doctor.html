@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CascadeCAD Doctor of Truth</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>CascadeCAD Doctor of Truth</h1>
+
+<div class="card">
+    <h2>Repository</h2>
+
+    <p>JavaScript Files:
+        <span id="js-count">--</span>
+    </p>
+
+    <p>Python Files:
+        <span id="py-count">--</span>
+    </p>
+
+    <p>HTML Templates:
+        <span id="html-count">--</span>
+    </p>
+
+</div>
+
+<div class="card">
+    <h2>Status</h2>
+    <p class="status" id="status">
+        Waiting for Doctor scan...
+    </p>
+</div>
+
+<script src="/static/js/doctor.js"></script>
+
+</body>
+</html>

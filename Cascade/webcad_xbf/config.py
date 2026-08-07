@@ -76,7 +76,7 @@ class Settings:
                 _env(
                     "CASCADE_CAD_STORAGE",
                     "WEBCAD_STORAGE",
-                    "/var/lib/cascade-cad",
+                    "/home/jayson_tolleson/Cascade/projects",
                 )
             ),
             max_upload_bytes=_int_env(

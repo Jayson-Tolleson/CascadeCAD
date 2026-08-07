@@ -1,0 +1,151 @@
+/* CascadeCAD 6-Tier Stacked Ribbon System */
+.toolbar-dock {
+    width: 100%;
+    background: #090d16;
+    border-bottom: 2px solid #00f0ff;
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1000;
+}
+
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.toolbar-row:nth-child(even) {
+    background: #131c31;
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 3px 6px;
+}
+
+.tool-group-label {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #00f0ff;
+    padding-right: 5px;
+    margin-right: 2px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.toolbar-drag-handle {
+    display: none;
+}
+
+.tool-group button, 
+.export-control button, 
+#toolbar-dock button {
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s ease-in-out;
+}
+
+.tool-group button:hover, 
+#toolbar-dock button:hover {
+    background: #00f0ff;
+    color: #020617;
+    border-color: #00f0ff;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.tool-group button.active, 
+.tool-group button:active {
+    background: #00f0ff;
+    color: #020617;
+    font-weight: 700;
+}
+
+button.primary-action, #import-model-btn {
+    background: linear-gradient(135deg, #00f0ff 0%, #007bff 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+}
+
+button.primary-action:hover, #import-model-btn:hover {
+    background: linear-gradient(135deg, #38bdf8 0%, #0056b3 100%) !important;
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.8) !important;
+}
+
+button.danger {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+button.danger:hover {
+    background: #dc2626 !important;
+}
+
+.export-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.export-control select, .unit-toggle {
+    background: #0f172a;
+    color: #00f0ff;
+    border: 1px solid #00f0ff;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.export-selection {
+    font-size: 10px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Toolbar Slide-Up & Hover Retraction */
+.cascade-topbar {
+    position: relative;
+    overflow: visible;
+    min-height: 40px;
+}
+
+.toolbar-slide-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(calc(-100% + 38px)); /* Hides everything except the top project bar strip */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    z-index: 1000;
+    background: #090d16;
+    box-shadow: 0 4px 25px rgba(0, 240, 255, 0.25);
+    border-bottom: 2px solid #00f0ff;
+}
+
+.toolbar-slide-container:hover {
+    transform: translateY(0); /* Slides fully down into view on hover */
+}

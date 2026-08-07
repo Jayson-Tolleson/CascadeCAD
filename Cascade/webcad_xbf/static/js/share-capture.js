@@ -406,9 +406,6 @@ export function initShareCapture({viewer, getSourceCanvas, getProjectName, appPa
       }
     }
 
-    // Keep the fallback in the original click turn so desktop popup blockers
-    // allow the platform page to open. The file downloads first because web
-    // compose intents cannot attach an arbitrary local file automatically.
     downloadBlob(activeMedia.blob, activeMedia.filename);
     if (target === 'bluesky') {
       const intent = `https://bsky.app/intent/compose?text=${encodeURIComponent(currentCaption())}`;

@@ -422,6 +422,186 @@ function initialize() {
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initialize, {once: true});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const projectId = document.body.dataset.projectId;
+    if (!projectId) return;
+
+    // ---------------------------------------------------------
+    // 1. EXPORT PIPELINE (.XBF, .STEP, .CSG, .BREP, .FCStd)
+    // ---------------------------------------------------------
+    const exportBtn = document.getElementById('export-button');
+    const exportFormatSelect = document.getElementById('export-format');
+    const exportSelectedOnly = document.getElementById('export-selected-only');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            const format = exportFormatSelect ? exportFormatSelect.value : 'xbf';
+            const selectedOnly = exportSelectedOnly ? exportSelectedOnly.checked : false;
+            
+            console.log(`📤 Requesting export: format=.${format}, selectionOnly=${selectedOnly}`);
+            
+            try {
+                const response = await fetch(`/${projectId}/export?format=${format}&selected=${selectedOnly}`, {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = `project_${projectId}.${format}`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    console.log("✅ Export file downloaded successfully.");
+                } else {
+                    console.error("❌ Server returned export error status:", response.status);
+                }
+            } catch (err) {
+                console.error("❌ Export request failed:", err);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------
+    // 2. COMMIT EDITS (Save working state to master.xbf)
+    // ---------------------------------------------------------
+    const commitBtn = document.getElementById('commit-edits');
+    if (commitBtn) {
+        commitBtn.addEventListener('click', async () => {
+            console.log("💾 Committing current edits to master XBF...");
+            try {
+                const res = await fetch(`/${projectId}/commit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                console.log("✅ Commit successful:", data);
+            } catch (err) {
+                console.error("❌ Commit failed:", err);
+            }
+        });
+    }
+
+    // ---------------------------------------------------------
+    // 3. RELOAD MASTER XBF (Revert uncommitted workspace changes)
+    // ---------------------------------------------------------
+    const reloadMasterBtn = document.getElementById('reload-master');
+    if (reloadMasterBtn) {
+        reloadMasterBtn.addEventListener('click', async () => {
+            if (!confirm("Are you sure you want to reload master.xbf? Uncommitted changes will be lost.")) return;
+            
+            console.log("🔄 Reverting workspace to committed master XBF...");
+            try {
+                const res = await fetch(`/${projectId}/reload`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                console.log("✅ Workspace reloaded:", data);
+                // Refresh the page or viewport data
+                window.location.reload();
+            } catch (err) {
+                console.error("❌ Failed to reload master XBF:", err);
+            }
+        });
+    }
+});
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const projectId = document.body.dataset.projectId;
+    if (!projectId) return;
+
+    // 1. Undo Button
+    const undoBtn = document.getElementById('undo-edit');
+    if (undoBtn) {
+        undoBtn.addEventListener('click', async () => {
+            console.log("⏪ Dispatching Undo command...");
+            try {
+                const res = await fetch('/api/v1/commands/undo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_id: projectId })
+                });
+                const data = await res.json();
+                console.log("✅ Undo response:", data);
+            } catch (err) {
+                console.error("❌ Undo failed:", err);
+            }
+        });
+    }
+
+    // 2. Redo Button
+    const redoBtn = document.getElementById('redo-edit');
+    if (redoBtn) {
+        redoBtn.addEventListener('click', async () => {
+            console.log("⏩ Dispatching Redo command...");
+            try {
+                const res = await fetch('/api/v1/commands/redo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_id: projectId })
+                });
+                const data = await res.json();
+                console.log("✅ Redo response:", data);
+            } catch (err) {
+                console.error("❌ Redo failed:", err);
+            }
+        });
+    }
+
+    // 3. Commit XBF Button
+    const commitBtn = document.getElementById('commit-edits');
+    if (commitBtn) {
+        commitBtn.addEventListener('click', async () => {
+            console.log("💾 Committing master XBF...");
+            try {
+                const res = await fetch(`/${projectId}/commit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                console.log("✅ Commit successful:", data);
+            } catch (err) {
+                console.error("❌ Commit failed:", err);
+            }
+        });
+    }
+
+    // 4. Combine Projects / Assembly Dialog Trigger
+    const combineBtn = document.getElementById('combine-projects');
+    const combineDialog = document.getElementById('combine-dialog');
+    if (combineBtn && combineDialog) {
+        combineBtn.addEventListener('click', async () => {
+            console.log("🧩 Fetching project list for assembly...");
+            try {
+                const res = await fetch('/api/projects');
+                const projects = await res.json();
+                
+                // Populate your combine dialog list container here
+                const listContainer = document.getElementById('combine-project-list');
+                if (listContainer) {
+                    listContainer.innerHTML = projects.map(p => 
+                        `<label><input type="checkbox" value="${p.id}"> ${p.name}</label>`
+                    ).join('');
+                }
+                
+                combineDialog.showModal();
+            } catch (err) {
+                console.error("❌ Failed to load projects list:", err);
+            }
+        });
+    }
+});
+
+
+
 } else {
   initialize();
 }
