@@ -22,7 +22,7 @@
         }
     </style>
 </head>
-<body class="workspace" data-base-path="{{ base_path }}" data-project-id="{{ project.id }}" data-project-module="{{ url_for('static', filename='js/project.js') }}?v=0.7.5">
+<body class="workspace" data-base-path="{{ base_path }}" data-project-id="{{ project.id }}" data-project-module="{{ url_for('static', filename='js/project.js?v=0.7.5') }}?v=0.7.5">
   <header class="topbar cascade-topbar">
     <div class="project-identity">
       <a href="{{ url_for('index') }}" class="brand">CascadeCAD</a>
@@ -320,7 +320,7 @@
     <form method="dialog" class="model-shell">
       <header><div><h2>Import CAD Model</h2><p>Universal CAD import pipeline</p></div><button value="cancel" class="icon-button">×</button></header>
       <div class="model-fields">
-        <label>Select CAD file <input id="cad-file-input" type="file" accept=".step,.stp,.iges,.igs,.brep,.stl,.obj,.ply,.glb,.fcstd,.xbf"></label>
+        <label>Select CAD file <input id="cad-import-file" type="file" accept=".step,.stp,.iges,.igs,.brep,.stl,.obj,.ply,.glb,.fcstd,.xbf"></label>
         <p class="small-copy">Supported: FCStd · STEP · IGES · BREP · STL · OBJ · GLTF</p>
         <div id="import-progress-panel"><p id="import-stage">Waiting for file...</p><div id="pixel-container" class="pixel-container"></div></div>
       </div>
@@ -330,16 +330,18 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <!-- Clean, unified asset pipeline script loading -->
-  <script defer src="{{ url_for('static', filename='js/app_loader.js') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/collaboration.js', v='0.7.5') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/viewport.js', v='0.7.5') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/ui_core.js', v='0.7.5') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/viewport.js?v=0.7.5') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/ui_core.js?v=0.7.5') }}"></script>
   <script defer src="{{ url_for('static', filename='js/project-bootstrap.js') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/project.js', v='0.7.5') }}"></script>
-  <script type="module" src="{{ url_for('static', filename='js/share-capture.js', v='0.7.5') }}"></script>
   <script defer src="{{ url_for('static', filename='js/import/import_progress.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/import/import_dialog.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/import/import_manager.js') }}"></script>
+    <script src="/static/js/collaboration.js"></script>
+    <script src="/static/js/app_loader.js"></script>
+    <script src="/static/js/project-bootstrap.js"></script>
+    <script src="/static/js/project.js"></script>
+    <script src="/static/js/share-capture.js"></script>
+    <script src="/static/js/ui_core.js"></script>
+    <script src="/static/js/viewport.js"></script>
 </body>
 </html>

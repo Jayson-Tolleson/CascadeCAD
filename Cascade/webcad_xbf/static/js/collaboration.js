@@ -1,4 +1,13 @@
-const SESSION_KEY = 'cascadecad-collaboration-session-v1';
+
+    function getOrCreateClientId() {
+      let id = localStorage.getItem('cascade_cad_client_id');
+      if (!id) {
+        id = 'user_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('cascade_cad_client_id', id);
+      }
+      return id;
+    }
+    const SESSION_KEY = 'cascadecad-collaboration-session-v1';
 const ACTIVE_TAB_KEY = 'cascadecad-collaboration-side-tab';
 const PRESENCE_INTERVAL_MS = 25000;
 const RECONNECT_DELAY_MS = 2500;
@@ -10,7 +19,7 @@ function formatTime(timestamp) {
   return Number.isNaN(value.getTime()) ? '' : value.toLocaleString([], {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'});
 }
 
-export function initCollaboration({
+function initCollaboration({
   projectId,
   appPath,
   notify,
@@ -342,7 +351,7 @@ export function initCollaboration({
 
   async function joinProject() {
     try {
-      const result = await jsonRequest(`/api/projects/${projectId}/collaboration/join`, {method: 'POST', body: '{}'});
+      const result = await jsonRequest(`/api/projects/${projectId || "prj_cascade_v1"}/collaboration/join`, {method: 'POST', body: '{}'});
       state.membership = result.membership;
       state.members = asArray(result.members);
       projectChatAccess.textContent = `Private to ${state.members.length} project member${state.members.length === 1 ? '' : 's'} · your role: ${state.membership.role}`;
@@ -362,7 +371,7 @@ export function initCollaboration({
 
   async function loadProjectMessages() {
     if (!state.membership) return;
-    const result = await jsonRequest(`/api/projects/${projectId}/collaboration/messages?limit=150`);
+    const result = await jsonRequest(`/api/projects/${projectId || "prj_cascade_v1"}/collaboration/messages?limit=150`);
     renderMessages(projectChatMessages, asArray(result.messages), 'project');
   }
 
@@ -381,7 +390,7 @@ export function initCollaboration({
 
   async function loadMembers() {
     if (!state.membership) return;
-    const result = await jsonRequest(`/api/projects/${projectId}/collaboration/users`);
+    const result = await jsonRequest(`/api/projects/${projectId || "prj_cascade_v1"}/collaboration/users`);
     state.membership = result.membership;
     state.members = asArray(result.members);
     renderMembers();
@@ -399,7 +408,7 @@ export function initCollaboration({
 
   function connectProjectSocket() {
     if (!state.membership) return;
-    connectSocket('project', `/ws/projects/${projectId}/collaboration`, event => {
+    connectSocket('project', `/ws/projects/${projectId || 'prj_cascade_v1'}/collaboration`, event => {
       if (event.type === 'message' && event.message) {
         appendMessage(projectChatMessages, event.message, 'project');
         if (event.message.user_id !== state.user?.id) setUnread('project', 1);
@@ -441,7 +450,7 @@ export function initCollaboration({
     const text = input.value.trim();
     if (!text) return;
     const componentIds = byId('project-chat-link-selection')?.checked ? asArray(getSelectedComponentIds?.()) : [];
-    const result = await jsonRequest(`/api/projects/${projectId}/collaboration/messages`, {
+    const result = await jsonRequest(`/api/projects/${projectId || "prj_cascade_v1"}/collaboration/messages`, {
       method: 'POST',
       body: JSON.stringify({text, component_ids: componentIds}),
     });
@@ -535,7 +544,7 @@ export function initCollaboration({
   inviteForm?.addEventListener('submit', async event => {
     event.preventDefault();
     try {
-      const result = await jsonRequest(`/api/projects/${projectId}/collaboration/invite`, {
+      const result = await jsonRequest(`/api/projects/${projectId || "prj_cascade_v1"}/collaboration/invite`, {
         method: 'POST',
         body: JSON.stringify({
           username: byId('project-invite-username').value,

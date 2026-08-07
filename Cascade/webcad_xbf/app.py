@@ -1,44 +1,46 @@
-from .assistant_api import assistant_bp
-from .command_api import command_bp
+import os
+from pathlib import Path
+from quart import Quart, jsonify, render_template, request
+from quart_cors import cors
 from .project_api import project_bp
-from quart import Quart, render_template
-from .render_api import render_bp
 from .xbf_api import xbf_bp
+from .collaboration import collaboration_bp
 
-# Point static_folder directly into the webcad-xbf directory
-# Point static_folder and template_folder directly into the webcad_xbf directory
-app = Quart(__name__, template_folder="templates", static_folder="static")
+def create_app() -> Quart:
+    # Explicitly configure template and static folders relative to the module package
+    app = Quart(
+        __name__,
+        template_folder="templates",
+        static_folder="static"
+    )
+    app = cors(app, allow_origin="*")
+    app.config["CASCADE_STORAGE_DIR"] = Path(
+        os.getenv("CASCADE_STORAGE_DIR", "/home/jayson_tolleson/Cascade/projects")
+    )
+    app.config["CASCADE_STORAGE_DIR"].mkdir(parents=True, exist_ok=True)
 
-app.register_blueprint(project_bp, url_prefix="/cascade-cad")
-app.register_blueprint(xbf_bp, url_prefix="/cascade-cad")
-app.register_blueprint(render_bp, url_prefix="/cascade-cad")
-app.register_blueprint(command_bp, url_prefix="/cascade-cad")
-app.register_blueprint(assistant_bp, url_prefix="/cascade-cad")
+    app.register_blueprint(project_bp, url_prefix="/api/v1/projects")
+    app.register_blueprint(xbf_bp, url_prefix="/api/v1/projects")
+    app.register_blueprint(collaboration_bp, url_prefix="/api/v1/collaboration")
 
+    @app.route("/")
+    @app.route("/cascade-cad")
+    async def index():
+        project_name = request.args.get("project", None)
+        project_data = {"name": project_name} if project_name else None
+        return await render_template("project.html", project=project_data)
 
-@app.route("/")
-@app.route("/cascade-cad/")
-@app.route("/cascade-cad")
-async def index():
-  return await render_template("project.html", chunk_bytes=5242880, project={"name": "Untitled Project"})
+    @app.route("/api/status")
+    async def status():
+        return jsonify({
+            "status": "online",
+            "service": "CascadeCAD Server",
+            "version": "1.0.0"
+        }), 200
 
+    return app
+
+app = create_app()
 
 if __name__ == "__main__":
-  app.run(host="0.0.0.0", port=8790, debug=True)
-
-
-@app.route("/cascade-cad/api/projects/", methods=["GET"])
-@app.route("/api/v1/projects/", methods=["GET"])
-async def api_projects_compat():
-    try:
-        from Cascade.webcad_xbf.api.project_api import api_recent_projects
-        return await api_recent_projects()
-    except Exception:
-        return {"projects": []}, 200
-
-
-@app.route("/cascade-cad/api/v1/collaboration/join", methods=["POST", "OPTIONS"])
-@app.route("/cascade-cad/api/collaboration/join", methods=["POST", "OPTIONS"])
-@app.route("/api/v1/collaboration/join", methods=["POST", "OPTIONS"])
-async def api_collab_join_compat():
-    return {"status": "success", "message": "Collaboration session joined", "session_id": "default-session"}, 200
+    app.run(host="0.0.0.0", port=8790, debug=True)

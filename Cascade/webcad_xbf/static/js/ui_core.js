@@ -2,7 +2,7 @@
  * CascadeCAD Enterprise UI Core
  * Full integration controller for viewports, tabs, solids, materials, and import pipelines.
  */
-const CascadeCAD = {
+window.CascadeCAD = {
     init() {
         console.log("🚀 CascadeCAD Enterprise Core Initializing...");
         this.cacheDOM();
@@ -25,7 +25,7 @@ const CascadeCAD = {
     initTabs() {
         // Find all tab buttons (e.g., Selection, Users, Project Chat, Global)
         const tabButtons = document.querySelectorAll('.project-chat-tabs button, [data-tab-target], nav button');
-        
+
         tabButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const tabName = btn.innerText.trim();
@@ -70,32 +70,48 @@ const CascadeCAD = {
         });
     },
 
+
     executeCADCommand(command, btn) {
-        // Map UI commands to backend endpoints or Three.js actions
+        // Grab the dynamic project ID from the body tag
+        const projectId = document.body.dataset.projectId; //
         const solidTypes = ['Box', 'Cylinder', 'Pipe', 'Sphere', 'Torus', 'Cone', 'Extrude', 'Revolve'];
-        
+
         if (solidTypes.includes(command)) {
             console.log(`🧱 Generating Solid primitive: ${command}`);
-            this.postBackend('/api/geometry/primitive', { type: command.toLowerCase() });
+            // Routed to the new Command API endpoint
+            this.postBackend('/cascade-cad/api/v1/commands/execute', {
+                project_id: projectId,
+                action: 'create_primitive',
+                type: command.toLowerCase()
+            });
+        } else if (command === 'Undo') {
+            console.log("⏪ Triggering Undo");
+            this.postBackend('/cascade-cad/api/v1/commands/undo', { project_id: projectId });
+        } else if (command === 'Redo') {
+            console.log("⏩ Triggering Redo");
+            this.postBackend('/cascade-cad/api/v1/commands/redo', { project_id: projectId });
         } else if (command === 'Material') {
             console.log("🎨 Opening Material Properties Inspector");
             // Toggle material panel or trigger inspector
         } else if (command === 'Fit' && typeof controls !== 'undefined') {
-            // Reset viewport view if viewport.js is loaded
+            // Reset viewport view if viewport.js?v=0.7.5 is loaded
             console.log("🔍 Fitting view to scene");
         }
     },
 
+
+
     // 3. Import & Upload Pipeline
-    initImportPipeline() {
-        const importBtn = document.getElementById('import-btn') || document.getElementById('upload-btn');
+        initImportPipeline() {
+        // Updated to match the ID in project.html
+        const importBtn = document.getElementById('import-model-btn'); //[cite: 2, 3]
         if (importBtn && this.fileInput) {
             importBtn.addEventListener('click', () => {
                 console.log("📂 Opening native file picker for import");
                 this.fileInput.click();
             });
         }
-
+        // ... rest of the existing function remains the same
         if (this.fileInput) {
             this.fileInput.addEventListener('change', (e) => {
                 const files = e.target.files;
@@ -103,7 +119,7 @@ const CascadeCAD = {
 
                 const file = files[0];
                 console.log(`📦 Staged file for import: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-                
+
                 // Integrate with existing modular import manager if loaded
                 if (window.importManager && typeof window.importManager.handleFiles === 'function') {
                     window.importManager.handleFiles(files);
@@ -117,16 +133,21 @@ const CascadeCAD = {
     async uploadFileToBackend(file) {
         const formData = new FormData();
         formData.append('file', file);
-        
+        const projectId = document.body.dataset.projectId; //[cite: 3]
+
         this.showToast(`Uploading ${file.name}...`);
         try {
-            const response = await fetch('/api/upload', {
+            // Routed to the XBF API blueprint for this specific project
+            const response = await fetch(`/${projectId}/import`, {
                 method: 'POST',
                 body: formData
             });
             const result = await response.json();
             console.log("✅ Upload successful:", result);
             this.showToast(`Successfully uploaded ${file.name}`);
+
+            // Optional: Trigger a scene refresh here using the returned XBF data
+
         } catch (err) {
             console.error("❌ Upload failed:", err);
             this.showToast(`Upload failed for ${file.name}`);
@@ -146,7 +167,7 @@ const CascadeCAD = {
             this.aiBtn.disabled = true;
 
             try {
-                const response = await fetch('/api/ai/generate', {
+                const response = await fetch('/cascade-cad/api/ai/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
@@ -163,7 +184,7 @@ const CascadeCAD = {
         };
 
         this.aiBtn.addEventListener('click', handleAI);
-        this.aiInput.addEventListener('keypress', (e) => {
+        if (this.aiInput && typeof this.aiInput.addEventListener === 'function') this.aiInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleAI();
         });
     },
@@ -185,7 +206,7 @@ const CascadeCAD = {
         if (!this.toast) return;
         this.toast.innerText = message;
         this.toast.hidden = false;
-        
+
         this.toast.style.position = 'fixed';
         this.toast.style.bottom = '100px';
         this.toast.style.left = '50%';
@@ -195,7 +216,7 @@ const CascadeCAD = {
         this.toast.style.padding = '8px 16px';
         this.toast.style.borderRadius = '6px';
         this.toast.style.zIndex = '9999';
-        
+
         clearTimeout(this.toastTimer);
         this.toastTimer = setTimeout(() => { this.toast.hidden = true; }, 2500);
     }
