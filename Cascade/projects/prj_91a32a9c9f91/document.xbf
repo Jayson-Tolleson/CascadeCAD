@@ -1,0 +1,16 @@
+{
+  "project_id": "prj_91a32a9c9f91",
+  "created": "2026-08-07T05:31:31.189145",
+  "source": "test.step",
+  "format": {
+    "filename": "test.step",
+    "extension": ".step",
+    "category": "SOLID",
+    "handler": "step_importer",
+    "supported": true,
+    "status": "READY",
+    "target": "STEP importer"
+  },
+  "status": "IMPORT_PENDING",
+  "native_format": "XBF"
+}

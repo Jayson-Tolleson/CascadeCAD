@@ -4,11 +4,19 @@
  */
 window.CascadeCAD = {
     init() {
+        if (window.CADLog) {
+    CADLog.write(
+        "system",
+        "Enterprise UI Core boot sequence"
+    );
+}
         console.log("🚀 CascadeCAD Enterprise Core Initializing...");
+        this.executeCADCommand(command, btn); 
         this.cacheDOM();
         this.initTabs();
         this.initToolbar();
         this.initImportPipeline();
+        this.initFileCommands();
         this.initAIBar();
         console.log("✅ CascadeCAD Enterprise Core Fully Active.");
     },
@@ -153,6 +161,150 @@ window.CascadeCAD = {
             this.showToast(`Upload failed for ${file.name}`);
         }
     },
+
+
+// 4. File / Project Commands
+initFileCommands() {
+
+    const newBtn = document.getElementById('new-project');
+    const saveBtn = document.getElementById('save-project');
+    const saveAsBtn = document.getElementById('save-as-project');
+    const openBtn = document.getElementById('open-project');
+
+
+    if (newBtn) {
+        newBtn.addEventListener('click', async () => {
+
+            const username = prompt(
+                "CascadeCAD Username:"
+            );
+
+            if (!username) return;
+
+
+            const projectName = prompt(
+                "Project Name:"
+            );
+
+            if (!projectName) return;
+
+
+            console.log(
+                "Creating project:",
+                username,
+                projectName
+            );
+
+
+            try {
+
+                const response = await fetch(
+                    '/cascade-cad/api/v1/projects/new',
+                    {
+                        method:'POST',
+                        headers:{
+                            'Content-Type':'application/json'
+                        },
+                        body:JSON.stringify({
+                            username,
+                            project_name:projectName
+                        })
+                    }
+                );
+
+
+                const data = await response.json();
+
+                console.log(
+                    "New project result:",
+                    data
+                );
+
+
+                if(data.project_id){
+
+                    window.location.href =
+                    `/project/${data.project_id}`;
+
+                }
+
+
+            } catch(err){
+
+                console.error(
+                    "Project creation failed:",
+                    err
+                );
+
+            }
+
+        });
+    }
+
+
+    if(saveBtn){
+        saveBtn.addEventListener(
+            'click',
+            ()=>{
+                console.log(
+                    "💾 Save Project"
+                );
+
+                this.showToast(
+                    "Saving XBF..."
+                );
+
+                this.postBackend(
+                    '/cascade-cad/api/v1/projects/save',
+                    {
+                        project_id:
+                        document.body.dataset.projectId
+                    }
+                );
+            }
+        );
+    }
+
+
+    if(saveAsBtn){
+        saveAsBtn.addEventListener(
+            'click',
+            ()=>{
+                console.log(
+                    "📁 Save As"
+                );
+
+                this.showToast(
+                    "Save As dialog coming"
+                );
+            }
+        );
+    }
+
+
+    if(openBtn){
+        openBtn.addEventListener(
+            'click',
+            ()=>{
+                console.log(
+                    "📂 Open Project"
+                );
+
+                this.showToast(
+                    "Project browser coming"
+                );
+            }
+        );
+    }
+
+}
+
+
+
+
+
+
+
 
     // 4. AI Engineering Assistant Bar
     initAIBar() {

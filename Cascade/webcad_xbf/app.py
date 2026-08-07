@@ -1,9 +1,12 @@
 import sys
 from pathlib import Path
+from .backend import backend_bp
+from .render_api import render_bp
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from tools.doctor_repo import report
+from tools.doctor_api import report as api_report
 import os
 from pathlib import Path
 from quart import Quart, jsonify, render_template, request
@@ -24,11 +27,11 @@ def create_app() -> Quart:
         os.getenv("CASCADE_STORAGE_DIR", "/home/jayson_tolleson/Cascade/projects")
     )
     app.config["CASCADE_STORAGE_DIR"].mkdir(parents=True, exist_ok=True)
-
+    app.register_blueprint(backend_bp)
+    app.register_blueprint(render_bp)
     app.register_blueprint(project_bp, url_prefix="/api/v1/projects")
     app.register_blueprint(xbf_bp, url_prefix="/api/v1/projects")
     app.register_blueprint(collaboration_bp, url_prefix="/api/v1/collaboration")
-
     @app.route("/")
     @app.route("/cascade-cad")
     async def index():
@@ -51,7 +54,9 @@ def create_app() -> Quart:
     async def doctor_repository():
         return jsonify(report())
 
-
+    @app.route("/api/doctor/api")
+    async def doctor_api():
+        return jsonify(api_report())
 
 
     return app

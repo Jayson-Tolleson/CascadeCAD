@@ -1,10 +1,12 @@
 from pathlib import Path
-import json
 import uuid
 from datetime import datetime
 
+from ..xbf_document import XBFDocument
+
 
 def create_xbf_shell(source_file, import_info, storage_dir):
+
     project_id = "prj_" + uuid.uuid4().hex[:12]
 
     project_dir = Path(storage_dir) / project_id
@@ -12,23 +14,36 @@ def create_xbf_shell(source_file, import_info, storage_dir):
 
     xbf_file = project_dir / "document.xbf"
 
-    manifest = {
+    #
+    # Create real CascadeCAD XBF
+    #
+    doc = XBFDocument(project_id)
+
+    asset_id = doc.import_cad_file(
+        str(Path(storage_dir) / source_file)
+    )
+
+    doc.metadata.update({
         "project_id": project_id,
         "created": datetime.utcnow().isoformat(),
         "source": source_file,
-        "format": import_info,
-        "status": "IMPORT_PENDING",
-        "native_format": "XBF"
-    }
+        "import": import_info
+    })
 
-    xbf_file.write_text(
-        json.dumps(manifest, indent=2)
-    )
+    doc.save(str(xbf_file))
+
 
     return {
         "project_id": project_id,
         "project_path": str(project_dir),
         "xbf": str(xbf_file),
-        "manifest": manifest
+        "asset_id": asset_id,
+        "manifest": {
+            "project_id": project_id,
+            "created": doc.metadata["created"],
+            "source": source_file,
+            "format": import_info,
+            "status": "READY",
+            "native_format": "XBF"
+        }
     }
-

@@ -34,6 +34,32 @@
       <div class="toolbar-row" data-toolbar-row="bar-1">
         <div class="tool-group" data-toolbar-id="project">
           <span class="tool-group-label">Project</span>
+
+
+
+
+<button id="new-project" type="button">
+    New
+  </button>
+
+  <button id="open-project" type="button">
+    Open
+  </button>
+
+  <button id="save-project" type="button">
+    Save
+  </button>
+
+  <button id="save-project-as" type="button">
+    Save As
+  </button>
+
+  <button id="recent-projects" type="button">
+    Recent
+  </button>
+
+
+
           <button id="undo-edit" type="button" title="Undo (Ctrl+Z)">Undo</button>
           <button id="redo-edit" type="button" title="Redo (Ctrl+Y)">Redo</button>
           <button id="fit-view" type="button" title="Fit view (F)">Fit</button>
@@ -58,7 +84,20 @@
             <button id="import-model-btn" type="button" class="primary-action">Import CAD</button>
             <button id="export-button" type="button" class="primary-action">Export</button>
             <button id="convert-faceted-solids" type="button">Faceted Solids</button>
-            <button id="cancel-job" type="button" class="danger" hidden>Cancel</button>
+            
+
+<button id="repair-geometry" type="button">
+Repair Geometry
+</button>
+
+<button id="tessellate-xbf" type="button">
+Tessellate XBF
+</button>
+
+
+
+
+<button id="cancel-job" type="button" class="danger" hidden>Cancel</button>
           </div>
         </div>
       </div>
@@ -196,6 +235,28 @@
       <div id="renderer-diagnostics" class="renderer-diagnostics" aria-live="polite" hidden></div>
       <div class="viewer-message">Preparing editable preview…</div>
       <div id="snap-indicator" class="snap-indicator" hidden>OSnap</div>
+<section id="viewer" class="viewer" tabindex="0">
+
+  <div id="renderer-card" class="renderer-card">
+
+    <div class="renderer-header">
+      <span>CASCADECAD XBF RENDERER</span>
+      <span id="renderer-status">XBF READY</span>
+    </div>
+
+    <canvas id="cad-canvas"></canvas>
+
+    <div class="renderer-controls">
+      <button id="repair-mesh">Repair Mesh</button>
+      <button id="tessellate-model">Tessellate</button>
+      <button id="reload-glb">Reload GLB</button>
+    </div>
+
+  </div>
+
+  <div id="renderer-diagnostics" class="renderer-diagnostics" aria-live="polite" hidden></div>
+
+</section>
       <div class="viewer-hint">Click to select · W move · E rotate · R scale · Space hide/show · Delete removes · Esc clears</div>
     </section>
 
@@ -331,10 +392,11 @@
   <div id="toast" class="toast" hidden></div>
 
   <!-- Clean, unified asset pipeline script loading -->
-  <script defer src="{{ url_for('static', filename='js/app_loader.js') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/collaboration.js', v='0.7.5') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/viewport.js', v='0.7.5') }}"></script>
-  <script defer src="{{ url_for('static', filename='js/ui_core.js', v='0.7.5') }}"></script>
+<script defer src="{{ url_for('static', filename='js/app_loader.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/cadlog.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/collaboration.js', v='0.7.5') }}"></script>
+<script defer src="{{ url_for('static', filename='js/viewport.js', v='0.7.5') }}"></script>
+<script defer src="{{ url_for('static', filename='js/ui_core.js', v='0.7.5') }}"></script>
   <script defer src="{{ url_for('static', filename='js/project-bootstrap.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/project.js', v='0.7.5') }}"></script>
   <script type="module" src="{{ url_for('static', filename='js/share-capture.js', v='0.7.5') }}"></script>
