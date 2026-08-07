@@ -1,10 +1,24 @@
-// CascadeCAD Doctor of Truth
-// Frontend controller
-
 console.log("CascadeCAD Doctor loaded");
 
+async function loadDoctorAPI() {
+
+    const response = await fetch("/api/doctor/api");
+    const data = await response.json();
+
+    document.getElementById("api-count").textContent =
+        data.count;
+
+    document.getElementById("api-status").textContent =
+        "PASS";
+}
+
+
+
+
 async function loadDoctorRepository() {
+
     try {
+
         const response = await fetch("/api/doctor/repository");
 
         if (!response.ok) {
@@ -13,29 +27,42 @@ async function loadDoctorRepository() {
 
         const data = await response.json();
 
+
         document.getElementById("js-count").textContent =
-            data.javascript ?? "--";
+            data.javascript;
 
         document.getElementById("py-count").textContent =
-            data.python ?? "--";
+            data.python;
 
         document.getElementById("html-count").textContent =
-            data.html ?? "--";
+            data.html;
 
-        document.getElementById("status").textContent =
-            "Repository scan complete";
+
+        document.getElementById("status-message").textContent =
+            "Doctor scan complete";
+
 
     } catch (error) {
 
-        console.error("Doctor error:", error);
+        console.error(error);
 
-        document.getElementById("status").textContent =
-            "Doctor backend not connected yet";
+        document.getElementById("status-message").textContent =
+            "Doctor connection failed";
 
     }
 }
 
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        loadDoctorRepository();
+        loadDoctorAPI();
+    }
+);
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadDoctorRepository();
-});
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    loadDoctorRepository
+);

@@ -3,25 +3,62 @@
 <head>
     <title>CascadeCAD Doctor of Truth</title>
     <meta charset="utf-8">
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
+            margin: 30px;
+            background: #111;
+            color: #eee;
         }
 
         h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #aaa;
             margin-bottom: 30px;
         }
 
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
         .card {
-            border: 1px solid #ccc;
+            background: #1b1b1b;
+            border: 1px solid #444;
+            border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
+        }
+
+        .title {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .value {
+            font-size: 32px;
+            font-weight: bold;
         }
 
         .status {
+            margin-top: 10px;
+            color: #7fff7f;
             font-weight: bold;
+        }
+
+        .pending {
+            color: #aaa;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -30,29 +67,70 @@
 
 <h1>CascadeCAD Doctor of Truth</h1>
 
+<div class="subtitle">
+    System diagnostic dashboard
+</div>
+
+
+<div class="grid">
+
+    <div class="card">
+        <div class="title">JavaScript Files</div>
+        <div class="value" id="js-count">--</div>
+        <div class="status">PASS</div>
+    </div>
+
+
+    <div class="card">
+        <div class="title">Python Files</div>
+        <div class="value" id="py-count">--</div>
+        <div class="status">PASS</div>
+    </div>
+
+
+    <div class="card">
+        <div class="title">HTML Templates</div>
+        <div class="value" id="html-count">--</div>
+        <div class="status">PASS</div>
+    </div>
+
 <div class="card">
-    <h2>Repository</h2>
+    <div class="title">API Wiring</div>
+    <div class="value" id="api-count">--</div>
+    <div class="status" id="api-status">
+        PENDING
+    </div>
+</div>
 
-    <p>JavaScript Files:
-        <span id="js-count">--</span>
-    </p>
 
-    <p>Python Files:
-        <span id="py-count">--</span>
-    </p>
+<div class="card">
+    <div class="title">Import Pipeline</div>
+    <div class="value" id="import-count">--</div>
+    <div class="status" id="import-status">
+        CHECKING
+    </div>
+</div>
 
-    <p>HTML Templates:
-        <span id="html-count">--</span>
-    </p>
+
+    <div class="card">
+        <div class="title">Renderer</div>
+        <div class="value">--</div>
+        <div class="status pending">
+            PENDING
+        </div>
+    </div>
 
 </div>
 
-<div class="card">
-    <h2>Status</h2>
-    <p class="status" id="status">
-        Waiting for Doctor scan...
-    </p>
-</div>
+<button onclick="loadDoctorRepository()">
+    Run Scan
+</button>
+
+
+<p id="status-message">
+    Waiting for scan...
+</p>
+
 
 <script src="/static/js/doctor.js"></script>
 
