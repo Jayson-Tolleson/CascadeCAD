@@ -1,0 +1,52 @@
+MAGICXBF CAPABILITY AUDIT
+
+This document audits the implementation status of major system capabilities as specified in the MagicXBF architecture document.
+
+============================================================
+CORE ARCHITECTURE
+============================================================
+
+*   **UI Layout (Sliding Panels/Toolbar):** IMPLEMENTED. The HTML/CSS structure directly implements the specified layout. The JavaScript `ui.js` manages the open/close state of the panels.
+*   **3D Viewport:** IMPLEMENTED. A full Three.js viewport is implemented in `viewport.js`, supporting orbit, pan, zoom, and selection.
+*   **Bottom Status Bar:** IMPLEMENTED. The status bar is present and dynamically updated by `ui.js` with selection count, triangle count, and engine status.
+*   **Responsive Behavior:** PARTIALLY IMPLEMENTED. The layout is fluid, but specific compact modes for the toolbar are not implemented. Panels correctly slide over the viewport, preserving its size.
+
+============================================================
+FUNCTIONAL CAPABILITIES
+============================================================
+
+*   **Project/File Operations:**
+    *   New Document: IMPLEMENTED. The backend has a `new_document` method, though the frontend does not yet have a dedicated button. Reloading the page serves this function.
+    *   Undo/Redo: PENDING BACKEND. The engine has no transaction history or command stack for undo/redo. Buttons are present but disabled/log intent only.
+
+*   **Import:** IMPLEMENTED. The backend `IoSystem` uses `CadQueryAdapter` to import STEP and IGES files. The frontend provides a file selection dialog. Mesh formats (STL, OBJ) are detected but explicitly disabled in this pass as they cannot be converted to B-Rep for further operations.
+
+*   **Export:** IMPLEMENTED. The backend `IoSystem` can export to STEP, STL, and the native XBF format. The frontend provides a prompt to select the format.
+
+*   **XBF (Native Format):** IMPLEMENTED. The `IoSystem` includes `_import_xbf` and `_export_xbf` methods. The format is defined as a JSON file containing scene metadata and base64-encoded B-Rep strings for each part, making it a self-contained, precise representation.
+
+*   **Primitives:** IMPLEMENTED. The backend `Operations` class can create Box, Cylinder, Sphere, Cone, and Torus primitives using the `CadQueryAdapter`. The frontend toolbar has corresponding buttons that are fully wired.
+
+*   **Transforms (Move, Rotate, Scale):** PENDING BACKEND. While the toolbar has buttons, there is no interactive gizmo in the viewport or backend API to apply transformations. The underlying `CadQueryAdapter` has the methods, but the full UI-to-backend pipeline is not built.
+
+*   **Booleans (Fuse, Subtract, Intersect):** IMPLEMENTED. The backend `Operations` class performs boolean operations using the `CadQueryAdapter`. The frontend toolbar buttons are wired to send the command and the current selection to the backend.
+
+*   **Draft Tools (Extrude, Revolve, etc.):** PENDING BACKEND. These require a 2D sketcher, which is not part of the current engine implementation.
+
+*   **Inspection (Measure, Info):** PENDING BACKEND. No backend methods for these operations have been implemented.
+
+*   **Tessellation:** IMPLEMENTED. The `Tessellator` class and `CadQueryAdapter` work together to convert B-Rep geometry into triangular meshes for the frontend. This is a core part of the rendering pipeline.
+
+*   **Mesh Repair:** PENDING BACKEND. No mesh repair functionality is implemented in the engine.
+
+*   **View Cube:** IMPLEMENTED. The `viewport.js` module implements an interactive 16-sided navigation cube that controls the main camera's orientation. It is a real, interactive control, not just a static image.
+
+*   **Assembly/Parts Panel:** IMPLEMENTED. The left panel's `ui.js` dynamically populates the assembly tree based on data received from the backend after each operation. Selection is synchronized between the tree and the viewport.
+
+*   **Properties Panel:** PARTIALLY IMPLEMENTED. The panel displays the name and ID of a single selected part. Full property editing (transform, material, etc.) is pending.
+
+*   **Engineering Assistant:** IMPLEMENTED. The assistant is a true command interface. It parses natural language for supported operations (e.g., "create a 50mm box", "subtract") and executes the corresponding backend command, triggering a scene update. It provides meaningful feedback for both understood and misunderstood commands.
+
+*   **Telemetry:** IMPLEMENTED. The `telemetry.js` module provides a centralized logging system. All major frontend modules (UI, API, Viewport, State) log events, which are displayed in the right-hand Telemetry panel, providing excellent diagnostic visibility.
+
+*   **Collaboration/Share Functionality:** DISABLED. These features are outside the scope of the core CAD application and have no backend implementation. The buttons are present for visual completeness but are non-functional.

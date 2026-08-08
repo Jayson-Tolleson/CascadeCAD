@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagicXBF</title>
+    <link rel="stylesheet" href="/static/css/magicxbf.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="magicxbf-app">
+
+        <!-- 3D VIEWPORT (Primary Workspace) -->
+        <div id="viewport-container">
+            <canvas id="three-canvas"></canvas>
+            <!-- View Cube will be dynamically created by viewport.js -->
+            <div id="view-cube-container"></div>
+        </div>
+
+        <!-- TOP SLIDING TOOLBAR -->
+        <div id="top-toolbar-system">
+            <div id="top-toolbar-handle">
+                <span class="handle-icon"></span>
+                <span class="handle-label">TOOLS</span>
+                <span class="handle-icon"></span>
+            </div>
+            <div id="top-toolbar-content">
+                <!-- BAR 1: PROJECT / FILE / IO -->
+                <div class="toolbar-row" data-toolbar-row="1">
+                    <strong class="toolbar-label">PROJECT</strong>
+                    <button id="import-model-btn" title="Import CAD File (STEP, IGES, XBF)">Import</button>
+                    <button id="export-button" title="Export Geometry">Export</button>
+                    <div class="separator"></div>
+                    <button id="undo-edit" title="Undo (Pending)">Undo</button>
+                    <button id="redo-edit" title="Redo (Pending)">Redo</button>
+                    <div class="separator"></div>
+                    <button id="fit-view" title="Fit View to Model">Fit</button>
+                    <button id="reload-master" title="Reload Page">Reload</button>
+                    <button id="commit-edits" title="Commit (Pending)">Commit</button>
+                    <div class="separator"></div>
+                    <button id="unit-toggle" title="Units (mm)">mm</button>
+                    <button id="preferences-button" title="Preferences (Pending)">Prefs</button>
+                </div>
+                <!-- BAR 2: TRANSFORM -->
+                <div class="toolbar-row" data-toolbar-row="2">
+                    <strong class="toolbar-label">TRANSFORM</strong>
+                    <button id="tool-select" class="active" title="Select Tool">Select</button>
+                    <button id="tool-move" title="Move Tool (Pending)">Move</button>
+                    <button id="tool-rotate" title="Rotate Tool (Pending)">Rotate</button>
+                    <button id="tool-scale" title="Scale Tool (Pending)">Scale</button>
+                    <div class="separator"></div>
+                    <button id="tool-clone" title="Clone Selection (Pending)">Clone</button>
+                    <button id="tool-array" title="Create Array (Pending)">Array</button>
+                    <button id="tool-mirror" title="Mirror Selection (Pending)">Mirror</button>
+                    <div class="separator"></div>
+                    <button id="tool-osnap" title="Object Snap (Pending)">OSnap</button>
+                </div>
+                <!-- BAR 3: SOLIDS -->
+                <div class="toolbar-row" data-toolbar-row="3">
+                    <strong class="toolbar-label">SOLIDS</strong>
+                    <button data-primitive="box">Box</button>
+                    <button data-primitive="cylinder">Cylinder</button>
+                    <button data-primitive="sphere">Sphere</button>
+                    <button data-primitive="cone">Cone</button>
+                    <button data-primitive="torus">Torus</button>
+                    <div class="separator"></div>
+                    <button id="tool-additive-helix" title="Helix (Pending)">Helix</button>
+                </div>
+                <!-- BAR 4: DRAFT -->
+                <div class="toolbar-row" data-toolbar-row="4">
+                    <strong class="toolbar-label">DRAFT</strong>
+                    <button data-draft="line" title="Line (Pending)">Line</button>
+                    <button data-draft="arc" title="Arc (Pending)">Arc</button>
+                    <button data-draft="circle" title="Circle (Pending)">Circle</button>
+                    <button data-draft="extrude" title="Extrude (Pending)">Extrude</button>
+                    <button data-draft="revolve" title="Revolve (Pending)">Revolve</button>
+                    <div class="separator"></div>
+                    <button id="tool-facebinder" title="FaceBinder (Pending)">FaceBinder</button>
+                </div>
+                <!-- BAR 5: BOOLEAN / INSPECT -->
+                <div class="toolbar-row" data-toolbar-row="5">
+                    <strong class="toolbar-label">MODIFY</strong>
+                    <button id="tool-fuse" data-operation="fuse">Fuse</button>
+                    <button id="tool-subtract" data-operation="cut">Subtract</button>
+                    <button id="split-selected" data-operation="intersect">Intersect</button>
+                    <div class="separator"></div>
+                    <button id="tool-fillet" title="Fillet (Pending)">Fillet</button>
+                    <button id="tool-chamfer" title="Chamfer (Pending)">Chamfer</button>
+                    <div class="separator"></div>
+                    <button id="tool-measure" title="Measure (Pending)">Measure</button>
+                    <button id="tool-info" title="Info (Pending)">Info</button>
+                    <button id="repair-mesh" title="Repair (Pending)">Repair</button>
+                    <button id="tessellate-model" title="Force Retessellate">Tessellate</button>
+                </div>
+                <!-- BAR 6: SHARE / COMMUNITY -->
+                <div class="toolbar-row" data-toolbar-row="6">
+                    <strong class="toolbar-label">SHARE</strong>
+                    <button id="share-photo" title="Photo (Pending)">Photo</button>
+                    <button id="share-record" title="Record (Pending)">Record</button>
+                    <button id="share-preview" title="Preview (Pending)">Preview</button>
+                    <div class="separator"></div>
+                    <button id="share-community" title="Community (Pending)">Community</button>
+                </div>
+
+                <!-- ENGINEERING ASSISTANT (Integrated) -->
+                <div id="engineering-assistant-bar">
+                    <div class="assistant-label">Engineering Assistant</div>
+                    <input type="text" id="assistant-input" placeholder="e.g., Create a 50 mm box">
+                    <button id="assistant-execute">Execute</button>
+                    <button id="assistant-expand" title="Expand Assistant Panel">⇲</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEFT SLIDING PANEL -->
+        <div id="left-panel" class="side-panel">
+            <div id="left-panel-handle" class="panel-handle"><span>⟨</span></div>
+            <div class="panel-content">
+                <div id="assembly-section" class="panel-section" style="flex: 1; display: flex; flex-direction: column;">
+                    <h4>ASSEMBLY / PARTS</h4>
+                    <div class="panel-controls">
+                        <input type="search" id="assembly-search" placeholder="Search parts...">
+                    </div>
+                    <ul id="assembly-tree" style="flex-grow: 1; overflow-y: auto; margin-top: 10px;">
+                        <li class="assembly-empty">No model loaded</li>
+                    </ul>
+                </div>
+                <div id="properties-section" class="panel-section" style="flex-shrink: 0; height: 300px; overflow-y: auto;">
+                    <h4>PART PROPERTIES</h4>
+                    <div id="properties-content">
+                        <p class="placeholder">Select a part to see its properties.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SLIDING PANEL -->
+        <div id="right-panel" class="side-panel">
+            <div id="right-panel-handle" class="panel-handle"><span>⟩</span></div>
+            <div class="panel-content">
+                <div class="tab-bar">
+                    <button class="tab-button active" data-tab="info">INFO</button>
+                    <button class="tab-button" data-tab="assistant">ASSISTANT</button>
+                    <button class="tab-button" data-tab="telemetry">TELEMETRY</button>
+                </div>
+                <div class="tab-content active" data-tab-content="info" id="info-tab-content">
+                    <h4>SELECTION INFO</h4>
+                    <div id="selection-info-content">
+                        <p class="placeholder">Nothing selected.</p>
+                    </div>
+                </div>
+                <div class="tab-content" data-tab-content="assistant" id="assistant-tab-content" style="display: flex; flex-direction: column; height: 100%;">
+                    <h4>ASSISTANT WORKSPACE</h4>
+                    <pre id="assistant-output-log" style="flex-grow: 1; margin-bottom: 10px;"></pre>
+                    <textarea id="assistant-workspace-input" placeholder="Enter multi-line commands or details here..." style="height: 100px; margin-bottom: 10px;"></textarea>
+                    <button id="assistant-workspace-execute">Execute Workspace Command</button>
+                </div>
+                <div class="tab-content" data-tab-content="telemetry" id="telemetry-tab-content" style="display: flex; flex-direction: column; height: 100%;">
+                    <h4>TELEMETRY / DEBUG</h4>
+                    <div class="panel-controls" style="flex-shrink: 0;">
+                        <button id="telemetry-clear">Clear</button>
+                        <label><input type="checkbox" id="telemetry-autoscroll" checked> Autoscroll</label>
+                    </div>
+                    <pre id="telemetry-log" style="flex-grow: 1; margin-top: 10px;"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM STATUS BAR -->
+        <div id="bottom-status-bar">
+            <span id="status-message">Ready</span>
+            <div class="spacer"></div>
+            <span id="status-xbf">XBF: v1.0</span>
+            <span id="status-selection">Sel: 0</span>
+            <span id="status-triangles">Tris: 0</span>
+            <span id="status-fps">FPS: --</span>
+            <span id="status-engine">Engine: IDLE</span>
+        </div>
+
+        <!-- Hidden file input for import -->
+        <input type="file" id="import-file-input" style="display: none;" multiple="false">
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>

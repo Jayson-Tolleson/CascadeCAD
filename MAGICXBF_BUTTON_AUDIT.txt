@@ -1,0 +1,215 @@
+MAGICXBF UI - INTERACTIVE CONTROL AUDIT
+
+This document audits every interactive control in the generated UI, tracing its functionality from the frontend to the backend.
+
+============================================================
+BAR 1: PROJECT / FILE / IO
+============================================================
+
+ID: import-model-btn
+LABEL: Import
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> UI.handleFileImport()
+API ENDPOINT: POST /api/import
+BACKEND OPERATION: engine.io_system.import_file() -> CadQueryAdapter.import_step() / import_iges()
+STATUS: IMPLEMENTED (for STEP, IGES, XBF)
+
+ID: export-button
+LABEL: Export
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> prompt() -> API.exportFile()
+API ENDPOINT: POST /api/export
+BACKEND OPERATION: engine.io_system.export_file() -> CadQueryAdapter.export_step() / export_stl() etc.
+STATUS: IMPLEMENTED (for STEP, STL, XBF)
+
+ID: undo-edit
+LABEL: Undo
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+ID: redo-edit
+LABEL: Redo
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+ID: fit-view
+LABEL: Fit
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> Viewport.fitToView()
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: IMPLEMENTED (Frontend Only)
+
+ID: reload-master
+LABEL: Reload
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> window.location.reload()
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: IMPLEMENTED (Frontend Only)
+
+ID: commit-edits
+LABEL: Commit
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+ID: unit-toggle
+LABEL: mm
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+ID: preferences-button
+LABEL: Prefs
+GROUP: PROJECT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+============================================================
+BAR 2: TRANSFORM
+============================================================
+
+ID: tool-select
+LABEL: Select
+GROUP: TRANSFORM
+FRONTEND HANDLER: (Default active tool, no operation)
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: IMPLEMENTED (Frontend Only State)
+
+ID: tool-move, tool-rotate, tool-scale, tool-clone, tool-array, tool-mirror, tool-osnap
+LABEL: Move, Rotate, Scale, etc.
+GROUP: TRANSFORM
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+============================================================
+BAR 3: SOLIDS
+============================================================
+
+ID: (none, uses data-primitive)
+LABEL: Box, Cylinder, Sphere, Cone, Torus
+GROUP: SOLIDS
+FRONTEND HANDLER: UI.handleToolbarClick() -> API.sendCommand('create_[primitive]')
+API ENDPOINT: POST /api/command
+BACKEND OPERATION: engine.operations.create_primitive() -> CadQueryAdapter.create_[primitive]()
+STATUS: IMPLEMENTED
+
+ID: tool-additive-helix
+LABEL: Helix
+GROUP: SOLIDS
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+============================================================
+BAR 4: DRAFT
+============================================================
+
+ID: (none, uses data-draft)
+LABEL: Line, Arc, Circle, Extrude, Revolve
+GROUP: DRAFT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+ID: tool-facebinder
+LABEL: FaceBinder
+GROUP: DRAFT
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+============================================================
+BAR 5: BOOLEAN / INSPECT
+============================================================
+
+ID: tool-fuse
+LABEL: Fuse
+GROUP: MODIFY
+FRONTEND HANDLER: UI.handleToolbarClick() -> API.sendCommand('fuse', {}, selection)
+API ENDPOINT: POST /api/command
+BACKEND OPERATION: engine.operations.boolean_operation('fuse') -> CadQueryAdapter.fuse()
+STATUS: IMPLEMENTED
+
+ID: tool-subtract
+LABEL: Subtract
+GROUP: MODIFY
+FRONTEND HANDLER: UI.handleToolbarClick() -> API.sendCommand('cut', {}, selection)
+API ENDPOINT: POST /api/command
+BACKEND OPERATION: engine.operations.boolean_operation('cut') -> CadQueryAdapter.cut()
+STATUS: IMPLEMENTED
+
+ID: split-selected
+LABEL: Intersect
+GROUP: MODIFY
+FRONTEND HANDLER: UI.handleToolbarClick() -> API.sendCommand('intersect', {}, selection)
+API ENDPOINT: POST /api/command
+BACKEND OPERATION: engine.operations.boolean_operation('intersect') -> CadQueryAdapter.intersect()
+STATUS: IMPLEMENTED
+
+ID: tool-fillet, tool-chamfer, tool-measure, tool-info, repair-mesh
+LABEL: Fillet, Chamfer, etc.
+GROUP: MODIFY
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: PENDING BACKEND
+
+ID: tessellate-model
+LABEL: Tessellate
+GROUP: MODIFY
+FRONTEND HANDLER: UI.handleToolbarClick() -> triggers API.tessellate() via handleApiResponse()
+API ENDPOINT: POST /api/tessellate
+BACKEND OPERATION: engine.main.get_tessellation()
+STATUS: IMPLEMENTED
+
+============================================================
+BAR 6: SHARE / COMMUNITY
+============================================================
+
+ID: share-photo, share-record, share-preview, share-community
+LABEL: Photo, Record, etc.
+GROUP: SHARE
+FRONTEND HANDLER: UI.handleToolbarClick() -> logs "pending"
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: DISABLED (No backend planned)
+
+============================================================
+ENGINEERING ASSISTANT
+============================================================
+
+ID: assistant-execute
+LABEL: Execute
+GROUP: ASSISTANT
+FRONTEND HANDLER: Assistant.executeFromBar() -> API.sendAssistantPrompt()
+API ENDPOINT: POST /api/assistant
+BACKEND OPERATION: engine.main.execute_assistant_command() -> dispatches to internal commands
+STATUS: IMPLEMENTED (for supported commands like create, subtract)
+
+ID: assistant-expand
+LABEL: ⇲
+GROUP: ASSISTANT
+FRONTEND HANDLER: Assistant.bindEvents() -> UI.expandAssistant()
+API ENDPOINT: None
+BACKEND OPERATION: None
+STATUS: IMPLEMENTED (Frontend Only)
