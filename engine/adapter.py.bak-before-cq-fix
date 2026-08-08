@@ -1,0 +1,315 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from typing import List, Tuple, Dict, Any, Optional
+import base64
+
+# --- Capability-based Imports ---
+try:
+    import cadquery as cq
+    from cadquery.occ_impl.shapes import Shape, Compound
+    from cadquery.importers import importStep, importIges, importBrep
+    CADQUERY_AVAILABLE = True
+except ImportError:
+    CADQUERY_AVAILABLE = False
+    # Define dummy classes for type hinting if CadQuery is not available
+    class Shape: pass
+    class Compound: pass
+
+try:
+    import trimesh
+    TRIMESH_AVAILABLE = True
+except ImportError:
+    TRIMESH_AVAILABLE = False
+
+
+class CadKernelAdapter(ABC):
+    """Abstract Base Class for a CAD Kernel Adapter."""
+
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+
+    # --- Primitives ---
+    @abstractmethod
+    def create_box(self, dx: float, dy: float, dz: float) -> Any:
+        pass
+
+    @abstractmethod
+    def create_cylinder(self, radius: float, height: float) -> Any:
+        pass
+
+    @abstractmethod
+    def create_sphere(self, radius: float) -> Any:
+        pass
+
+    @abstractmethod
+    def create_cone(self, radius1: float, radius2: float, height: float) -> Any:
+        pass
+
+    @abstractmethod
+    def create_torus(self, radius1: float, radius2: float) -> Any:
+        pass
+
+    # --- Booleans ---
+    @abstractmethod
+    def fuse(self, main_obj: Any, tool_objs: List[Any]) -> Any:
+        pass
+
+    @abstractmethod
+    def cut(self, main_obj: Any, tool_objs: List[Any]) -> Any:
+        pass
+
+    @abstractmethod
+    def intersect(self, main_obj: Any, tool_objs: List[Any]) -> Any:
+        pass
+
+    # --- Transforms ---
+    @abstractmethod
+    def translate(self, obj: Any, vector: Tuple[float, float, float]) -> Any:
+        pass
+
+    @abstractmethod
+    def rotate(self, obj: Any, axis: Tuple[float, float, float], angle: float) -> Any:
+        pass
+
+    @abstractmethod
+    def scale(self, obj: Any, factor: float) -> Any:
+        pass
+
+    # --- Tessellation ---
+    @abstractmethod
+    def tessellate(self, obj: Any, tolerance: float = 0.1, angular_tolerance: float = 0.1) -> Dict[str, Any]:
+        pass
+
+    # --- Import/Export ---
+    @abstractmethod
+    def import_step(self, file_path: str) -> List[Any]:
+        pass
+
+    @abstractmethod
+    def import_iges(self, file_path: str) -> List[Any]:
+        pass
+
+    @abstractmethod
+    def export_step(self, objs: List[Any], file_path: str) -> bool:
+        pass
+
+    @abstractmethod
+    def export_iges(self, objs: List[Any], file_path: str) -> bool:
+        pass
+
+    @abstractmethod
+    def export_stl(self, objs: List[Any], file_path: str, tolerance: float = 0.1) -> bool:
+        pass
+    
+    # --- B-Rep Serialization ---
+    @abstractmethod
+    def shape_to_brep_string(self, obj: Any) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def brep_string_to_shape(self, brep_string: str) -> Optional[Any]:
+        pass
+
+
+class NoCadAdapter(CadKernelAdapter):
+    """A fallback adapter for when no CAD kernel is installed."""
+    def get_name(self) -> str:
+        return "None"
+
+    def _not_implemented(self, *args, **kwargs):
+        raise NotImplementedError("A required CAD library (like CadQuery) is not installed.")
+
+    create_box = _not_implemented
+    create_cylinder = _not_implemented
+    create_sphere = _not_implemented
+    create_cone = _not_implemented
+    create_torus = _not_implemented
+    fuse = _not_implemented
+    cut = _not_implemented
+    intersect = _not_implemented
+    translate = _not_implemented
+    rotate = _not_implemented
+    scale = _not_implemented
+    tessellate = _not_implemented
+    import_step = _not_implemented
+    import_iges = _not_implemented
+    export_step = _not_implemented
+    export_iges = _not_implemented
+    export_stl = _not_implemented
+    shape_to_brep_string = _not_implemented
+    brep_string_to_shape = _not_implemented
+
+
+class CadQueryAdapter(CadKernelAdapter):
+    """Adapter for the CadQuery/OpenCASCADE kernel."""
+    def get_name(self) -> str:
+        return "CadQuery"
+
+    def _get_solid(self, obj: Any) -> Optional[Shape]:
+        if isinstance(obj, cq.Workplane):
+            return obj.val()
+        if isinstance(obj, (Shape, Compound)):
+            return obj
+        return None
+
+    def create_box(self, dx: float, dy: float, dz: float) -> cq.Workplane:
+        return cq.Workplane("XY").box(dx, dy, dz)
+
+    def create_cylinder(self, radius: float, height: float) -> cq.Workplane:
+        return cq.Workplane("XY").cylinder(height, radius)
+
+    def create_sphere(self, radius: float) -> cq.Workplane:
+        return cq.Workplane("XY").sphere(radius)
+
+    def create_cone(self, radius1: float, radius2: float, height: float) -> cq.Workplane:
+        return cq.Workplane("XY").cone(height, radius1, radius2)
+
+    def create_torus(self, radius1: float, radius2: float) -> cq.Workplane:
+        return cq.Workplane("XY").torus(radius1, radius2)
+
+    def fuse(self, main_obj: Any, tool_objs: List[Any]) -> cq.Workplane:
+        main_solid = self._get_solid(main_obj)
+        if not main_solid:
+            raise ValueError("Main object for fuse is not a valid solid.")
+        
+        wp = cq.Workplane(main_solid)
+        for tool in tool_objs:
+            tool_solid = self._get_solid(tool)
+            if tool_solid:
+                wp = wp.union(tool_solid)
+        return wp
+
+    def cut(self, main_obj: Any, tool_objs: List[Any]) -> cq.Workplane:
+        main_solid = self._get_solid(main_obj)
+        if not main_solid:
+            raise ValueError("Main object for cut is not a valid solid.")
+
+        wp = cq.Workplane(main_solid)
+        for tool in tool_objs:
+            tool_solid = self._get_solid(tool)
+            if tool_solid:
+                wp = wp.cut(tool_solid)
+        return wp
+
+    def intersect(self, main_obj: Any, tool_objs: List[Any]) -> cq.Workplane:
+        main_solid = self._get_solid(main_obj)
+        if not main_solid:
+            raise ValueError("Main object for intersect is not a valid solid.")
+
+        wp = cq.Workplane(main_solid)
+        for tool in tool_objs:
+            tool_solid = self._get_solid(tool)
+            if tool_solid:
+                wp = wp.intersect(tool_solid)
+        return wp
+
+    def translate(self, obj: Any, vector: Tuple[float, float, float]) -> cq.Workplane:
+        return cq.Workplane(self._get_solid(obj)).translate(vector)
+
+    def rotate(self, obj: Any, axis: Tuple[float, float, float], angle: float) -> cq.Workplane:
+        # CadQuery rotate takes start, end point, and angle
+        return cq.Workplane(self._get_solid(obj)).rotate((0,0,0), axis, angle)
+
+    def scale(self, obj: Any, factor: float) -> cq.Workplane:
+        return cq.Workplane(self._get_solid(obj)).scale(factor)
+
+    def tessellate(self, obj: Any, tolerance: float = 0.1, angular_tolerance: float = 0.1) -> Dict[str, Any]:
+        solid = self._get_solid(obj)
+        if not solid:
+            return {'vertices': [], 'faces': [], 'normals': []}
+
+        # Use OCCT's triangulation
+        triangulation = solid.tessellate(tolerance=tolerance, angular_tolerance=angular_tolerance)
+        vertices = [v.toTuple() for v in triangulation[0]]
+        
+        # Faces need to be flattened and 0-indexed
+        faces = []
+        for face_indices in triangulation[1]:
+            # Polygons with more than 3 vertices need to be triangulated
+            for i in range(len(face_indices) - 2):
+                faces.append(face_indices[0])
+                faces.append(face_indices[i + 1])
+                faces.append(face_indices[i + 2])
+        
+        # Normals can be calculated from the triangulation
+        normals = [n.toTuple() for n in solid.getNormals(triangulation[0])] if triangulation[0] else []
+
+        return {'vertices': vertices, 'faces': faces, 'normals': normals}
+
+    def import_step(self, file_path: str) -> List[Any]:
+        result = importStep(file_path)
+        if isinstance(result, Compound):
+            return list(result.Solids())
+        return [result]
+
+    def import_iges(self, file_path: str) -> List[Any]:
+        result = importIges(file_path)
+        if isinstance(result, Compound):
+            return list(result.Solids())
+        return [result]
+
+    def export_step(self, objs: List[Any], file_path: str) -> bool:
+        solids = [self._get_solid(o) for o in objs if self._get_solid(o)]
+        if not solids: return False
+        compound = cq.Compound.makeCompound(solids)
+        cq.exporters.export(compound, file_path, 'STEP')
+        return True
+
+    def export_iges(self, objs: List[Any], file_path: str) -> bool:
+        solids = [self._get_solid(o) for o in objs if self._get_solid(o)]
+        if not solids: return False
+        compound = cq.Compound.makeCompound(solids)
+        cq.exporters.export(compound, file_path, 'IGES')
+        return True
+
+    def export_stl(self, objs: List[Any], file_path: str, tolerance: float = 0.1) -> bool:
+        solids = [self._get_solid(o) for o in objs if self._get_solid(o)]
+        if not solids: return False
+        compound = cq.Compound.makeCompound(solids)
+        cq.exporters.export(compound, file_path, 'STL', tolerance=tolerance)
+        return True
+
+    def shape_to_brep_string(self, obj: Any) -> Optional[str]:
+        solid = self._get_solid(obj)
+        if not solid: return None
+        
+        # OCCT's BRepTools::Write to a string stream, then base64 encode
+        from OCP.BRepTools import BRepTools
+        from OCP.TCollection import TCollection_AsciiString
+        from io import BytesIO
+        
+        # This is a bit of a hack to write to a memory buffer
+        # A more direct way might exist but this is reliable
+        tmp_file = BytesIO()
+        BRepTools.Write_s(solid.wrapped, tmp_file)
+        tmp_file.seek(0)
+        brep_bytes = tmp_file.read()
+        return base64.b64encode(brep_bytes).decode('utf-8')
+
+    def brep_string_to_shape(self, brep_string: str) -> Optional[Any]:
+        from OCP.BRepTools import BRepTools
+        from OCP.TopoDS import TopoDS_Shape
+        from OCP.BRep.BRep_Builder import BRep_Builder
+        from io import BytesIO
+
+        brep_bytes = base64.b64decode(brep_string)
+        
+        # This is also a bit of a hack to read from a memory buffer
+        tmp_file = BytesIO(brep_bytes)
+        
+        shape = TopoDS_Shape()
+        builder = BRep_Builder()
+        BRepTools.Read_s(shape, tmp_file, builder)
+
+        if shape.IsNull():
+            return None
+        
+        return Shape(shape)
+
+
+def get_adapter() -> CadKernelAdapter:
+    """Factory function to get the best available CAD adapter."""
+    if CADQUERY_AVAILABLE:
+        return CadQueryAdapter()
+    return NoCadAdapter()

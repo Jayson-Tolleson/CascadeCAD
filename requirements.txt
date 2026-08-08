@@ -1,0 +1,6 @@
+quart
+hypercorn
+quart-cors
+trimesh
+numpy
+cadquery
