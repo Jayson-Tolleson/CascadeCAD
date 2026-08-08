@@ -1,0 +1,269 @@
+:root {
+    --bg-color: #282c34;
+    --panel-bg: #21252b;
+    --toolbar-bg: #3a3f4b;
+    --handle-bg: #4b5162;
+    --text-color: #abb2bf;
+    --highlight-color: #61afef;
+    --success-color: #98c379;
+    --error-color: #e06c75;
+    --border-color: #181a1f;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* --- Toolbar --- */
+.toolbar-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    transition: transform 0.3s ease-in-out;
+    transform: translateY(calc(-100% + 40px));
+}
+
+.toolbar-container.open {
+    transform: translateY(0);
+}
+
+.toolbar-handle {
+    width: 100px;
+    height: 40px;
+    background-color: var(--handle-bg);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin: 0 auto;
+    font-weight: bold;
+    user-select: none;
+}
+
+.toolbar {
+    background-color: var(--toolbar-bg);
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background-color: var(--panel-bg);
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+.group-label {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--highlight-color);
+    margin-right: 10px;
+    user-select: none;
+}
+
+button {
+    background-color: var(--handle-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: var(--highlight-color);
+    color: var(--bg-color);
+}
+
+button:disabled {
+    background-color: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* --- Main Content --- */
+#main-content {
+    flex-grow: 1;
+    display: flex;
+    padding-top: 40px; /* Space for the collapsed toolbar handle */
+    height: calc(100% - 40px - 25px); /* Full height minus toolbar handle and status bar */
+}
+
+#left-panel, #right-panel {
+    width: 200px;
+    background-color: var(--panel-bg);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.panel-header {
+    font-weight: bold;
+    color: var(--highlight-color);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#viewport-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+#scene-graph {
+    overflow-y: auto;
+}
+.scene-graph-item {
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+.scene-graph-item:hover {
+    background-color: var(--handle-bg);
+}
+.scene-graph-item.selected {
+    background-color: var(--highlight-color);
+    color: var(--bg-color);
+    font-weight: bold;
+}
+
+
+/* --- Assistant Panel --- */
+#assistant-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+#assistant-output {
+    flex-grow: 1;
+    background: #1c1e22;
+    border-radius: 4px;
+    padding: 8px;
+    overflow-y: auto;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.assistant-input-container {
+    display: flex;
+    margin-top: 10px;
+}
+#assistant-input {
+    flex-grow: 1;
+    background: #1c1e22;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px;
+    border-radius: 4px 0 0 4px;
+}
+#assistant-send-btn {
+    border-radius: 0 4px 4px 0;
+}
+
+/* --- Status Bar --- */
+#status-bar {
+    height: 25px;
+    background-color: var(--toolbar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    font-size: 0.9em;
+    border-top: 1px solid var(--border-color);
+}
+
+#status-indicator {
+    font-weight: bold;
+}
+#status-indicator.BUSY { color: var(--highlight-color); }
+#status-indicator.SUCCESS { color: var(--success-color); }
+#status-indicator.FAILED { color: var(--error-color); }
+#status-indicator.READY { color: var(--text-color); }
+
+/* --- Modals --- */
+.hidden { display: none !important; }
+#modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    z-index: 1001;
+    min-width: 300px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+.modal-header h3 { margin: 0; color: var(--highlight-color); }
+#modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    cursor: pointer;
+}
+.modal-body {
+    padding: 20px 15px;
+}
+.modal-body .form-group {
+    margin-bottom: 15px;
+}
+.modal-body label {
+    display: block;
+    margin-bottom: 5px;
+}
+.modal-body input, .modal-body select {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.modal-footer {
+    padding: 10px 15px;
+    text-align: right;
+    border-top: 1px solid var(--border-color);
+}

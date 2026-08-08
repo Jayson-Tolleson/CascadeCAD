@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagicXBF</title>
+<link rel="stylesheet" href="/magicxbf-cad/static/css/magicxbf.css">
+</head>
+<body>
+    <div id="magicxbf-app">
+
+        <!-- 3D VIEWPORT (Primary Workspace) -->
+        <div id="viewport-container">
+            <canvas id="three-canvas"></canvas>
+            <div id="view-cube"></div>
+        </div>
+
+        <!-- TOP SLIDING TOOLBAR -->
+        <div id="top-toolbar-system">
+            <div id="top-toolbar-handle">
+                <span class="handle-icon"></span>
+                <span class="handle-label">TOOLS</span>
+                <span class="handle-icon"></span>
+            </div>
+            <div id="top-toolbar-content">
+                <!-- BAR 1: PROJECT / FILE / IO -->
+                <div class="toolbar-row" data-toolbar-row="1">
+                    <strong class="toolbar-label">PROJECT</strong>
+                    <button id="import-model-btn" title="Import CAD File">Import</button>
+                    <button id="export-button" title="Export Geometry">Export</button>
+                    <div class="separator"></div>
+                    <button id="undo-edit" title="Undo">Undo</button>
+                    <button id="redo-edit" title="Redo">Redo</button>
+                    <div class="separator"></div>
+                    <button id="fit-view" title="Fit View to Model">Fit</button>
+                    <button id="reload-master" title="Reload Master XBF">Reload</button>
+                    <button id="commit-edits" title="Commit Working XBF">Commit</button>
+                    <div class="separator"></div>
+                    <button id="unit-toggle" title="Toggle Units">mm</button>
+                    <button id="preferences-button" title="Preferences">Prefs</button>
+                </div>
+                <!-- BAR 2: TRANSFORM -->
+                <div class="toolbar-row" data-toolbar-row="2">
+                    <strong class="toolbar-label">TRANSFORM</strong>
+                    <button id="tool-select" class="active" title="Select Tool">Select</button>
+                    <button id="tool-move" title="Move Tool">Move</button>
+                    <button id="tool-rotate" title="Rotate Tool">Rotate</button>
+                    <button id="tool-scale" title="Scale Tool">Scale</button>
+                    <div class="separator"></div>
+                    <button id="tool-clone" title="Clone Selection">Clone</button>
+                    <button id="tool-array" title="Create Array">Array</button>
+                    <button id="tool-mirror" title="Mirror Selection">Mirror</button>
+                    <div class="separator"></div>
+                    <button id="tool-osnap" title="Object Snap">OSnap</button>
+                </div>
+                <!-- BAR 3: SOLIDS -->
+                <div class="toolbar-row" data-toolbar-row="3">
+                    <strong class="toolbar-label">SOLIDS</strong>
+                    <button data-primitive="box">Box</button>
+                    <button data-primitive="cylinder">Cylinder</button>
+                    <button data-primitive="sphere">Sphere</button>
+                    <button data-primitive="cone">Cone</button>
+                    <button data-primitive="torus">Torus</button>
+                    <div class="separator"></div>
+                    <button id="tool-additive-helix">Helix</button>
+                </div>
+                <!-- BAR 4: DRAFT -->
+                <div class="toolbar-row" data-toolbar-row="4">
+                    <strong class="toolbar-label">DRAFT</strong>
+                    <button data-draft="line">Line</button>
+                    <button data-draft="arc">Arc</button>
+                    <button data-draft="circle">Circle</button>
+                    <button data-draft="extrude">Extrude</button>
+                    <button data-draft="revolve">Revolve</button>
+                    <div class="separator"></div>
+                    <button id="tool-facebinder">FaceBinder</button>
+                </div>
+                <!-- BAR 5: BOOLEAN / INSPECT -->
+                <div class="toolbar-row" data-toolbar-row="5">
+                    <strong class="toolbar-label">MODIFY</strong>
+                    <button id="tool-fuse" data-operation="fuse">Fuse</button>
+                    <button id="tool-subtract" data-operation="subtract">Subtract</button>
+                    <button id="split-selected" data-operation="split">Split</button>
+                    <div class="separator"></div>
+                    <button id="tool-fillet">Fillet</button>
+                    <button id="tool-chamfer">Chamfer</button>
+                    <div class="separator"></div>
+                    <button id="tool-measure">Measure</button>
+                    <button id="tool-info">Info</button>
+                    <button id="repair-mesh">Repair</button>
+                    <button id="tessellate-model">Tessellate</button>
+                </div>
+                <!-- BAR 6: SHARE / COMMUNITY -->
+                <div class="toolbar-row" data-toolbar-row="6">
+                    <strong class="toolbar-label">SHARE</strong>
+                    <button id="share-photo">Photo</button>
+                    <button id="share-record">Record</button>
+                    <button id="share-preview">Preview</button>
+                    <div class="separator"></div>
+                    <button id="share-community">Community</button>
+                </div>
+
+                <!-- ENGINEERING ASSISTANT (Integrated) -->
+                <div id="engineering-assistant-bar">
+                    <div class="assistant-label">Engineering Assistant</div>
+                    <input type="text" id="assistant-input" placeholder="e.g., Create a 50 mm box">
+                    <button id="assistant-execute">Execute</button>
+                    <button id="assistant-expand" title="Expand Assistant Panel">⇲</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEFT SLIDING PANEL -->
+        <div id="left-panel" class="side-panel">
+            <div id="left-panel-handle" class="panel-handle"><span>⟨</span></div>
+            <div class="panel-content">
+                <div class="panel-section">
+                    <h4>ASSEMBLY / PARTS</h4>
+                    <div class="panel-controls">
+                        <input type="search" placeholder="Search parts...">
+                    </div>
+                    <ul id="assembly-tree">
+                        <!-- Populated by JS -->
+                        <li><span class="icon-assembly"></span>Assembly
+                            <ul>
+                                <li><span class="icon-part"></span>Part-001</li>
+                                <li><span class="icon-part"></span>Part-002</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel-section">
+                    <h4>PART PROPERTIES</h4>
+                    <div id="properties-content">
+                        <p class="placeholder">Select a part to see its properties.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SLIDING PANEL -->
+        <div id="right-panel" class="side-panel">
+            <div id="right-panel-handle" class="panel-handle"><span>⟩</span></div>
+            <div class="panel-content">
+                <div class="tab-bar">
+                    <button class="tab-button active" data-tab="info">INFO</button>
+                    <button class="tab-button" data-tab="assistant">ASSISTANT</button>
+                    <button class="tab-button" data-tab="telemetry">TELEMETRY</button>
+                </div>
+                <div class="tab-content active" data-tab-content="info">
+                    <h4>SELECTION INFO</h4>
+                    <div id="selection-info-content">
+                        <p class="placeholder">Nothing selected.</p>
+                    </div>
+                </div>
+                <div class="tab-content" data-tab-content="assistant">
+                    <h4>ASSISTANT WORKSPACE</h4>
+                    <div id="assistant-workspace">
+                        <div id="assistant-output-log"></div>
+                        <textarea id="assistant-workspace-input" placeholder="Enter multi-line commands or details here..."></textarea>
+                        <button id="assistant-workspace-execute">Execute</button>
+                    </div>
+                </div>
+                <div class="tab-content" data-tab-content="telemetry">
+                    <h4>TELEMETRY / DEBUG</h4>
+                    <div class="panel-controls">
+                        <button id="telemetry-clear">Clear</button>
+                        <label><input type="checkbox" id="telemetry-autoscroll" checked> Autoscroll</label>
+                    </div>
+                    <div id="telemetry-log"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM STATUS BAR -->
+        <div id="bottom-status-bar">
+            <span id="status-message">Ready</span>
+            <div class="spacer"></div>
+            <span id="status-xbf">XBF: v0</span>
+            <span id="status-selection">Sel: 0</span>
+            <span id="status-triangles">Tris: 0</span>
+            <span id="status-fps">FPS: 60</span>
+            <span id="status-engine">Engine: IDLE</span>
+        </div>
+
+        <!-- Hidden file input for import -->
+        <input type="file" id="cad-file-input" style="display: none;" accept=".step,.stp,.iges,.igs,.brep,.stl">
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+<script type="module" src="/magicxbf-cad/static/js/main.js"></script>
+</body>
+</html>

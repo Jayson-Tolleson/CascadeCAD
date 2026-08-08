@@ -1,0 +1,1094 @@
+:root {
+    --bg-main: #282c34;
+    --bg-panel: #21252b;
+    --bg-toolbar: #323842;
+    --bg-input: #2c313a;
+    --bg-hover: #3a4049;
+    --border-color: #454c59;
+    --text-primary: #abb2bf;
+    --text-secondary: #828a9a;
+    --highlight-blue: #61afef;
+    --highlight-green: #98c379;
+    --highlight-red: #e06c75;
+    --highlight-orange: #d19a66;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
+    --panel-width: 320px;
+    --toolbar-height-collapsed: 40px;
+    --toolbar-height-expanded: 280px;
+    --z-panels: 10;
+    --z-toolbar: 20;
+    --z-viewport: 1;
+    --z-statusbar: 5;
+    --z-viewcube: 5;
+}
+
+/* --- BASE & LAYOUT --- */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+#magicxbf-app {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+#viewport-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-viewport);
+}
+
+#three-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* --- TOP TOOLBAR SYSTEM --- */
+
+
+
+
+#top-toolbar-handle {
+    height: var(--toolbar-height-collapsed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    background-color: #3a4049;
+}
+
+#top-toolbar-handle:hover {
+    background-color: var(--highlight-blue);
+    color: var(--bg-main);
+}
+
+.handle-label {
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 0 10px;
+}
+
+.handle-icon {
+    width: 10px;
+    height: 2px;
+    background-color: currentColor;
+    margin: 2px 0;
+}
+
+#top-toolbar-content {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.toolbar-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    width: 80px;
+    text-align: right;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.toolbar-row button {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.toolbar-row button:hover {
+    border-color: var(--highlight-blue);
+    color: var(--highlight-blue);
+}
+
+.toolbar-row button.active {
+    background-color: var(--highlight-blue);
+    color: var(--bg-main);
+    font-weight: bold;
+}
+
+.toolbar-row .separator {
+    width: 1px;
+    height: 20px;
+    background-color: var(--border-color);
+    margin: 0 5px;
+}
+
+/* --- ENGINEERING ASSISTANT BAR --- */
+#engineering-assistant-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    margin-top: 8px;
+    background-color: #1c2025;
+    border-top: 1px solid var(--border-color);
+}
+
+.assistant-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--highlight-orange);
+    margin-right: 15px;
+}
+
+#assistant-input {
+    flex-grow: 1;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+#assistant-input:focus {
+    outline: none;
+    border-color: var(--highlight-orange);
+}
+
+#assistant-execute, #assistant-expand {
+    margin-left: 8px;
+    background-color: var(--highlight-orange);
+    color: var(--bg-main);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#assistant-expand {
+    padding: 6px 8px;
+}
+
+/* --- SLIDING SIDE PANELS --- */
+.side-panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--panel-width);
+    background-color: var(--bg-panel);
+    z-index: var(--z-panels);
+    display: flex;
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+#left-panel {
+    left: 0;
+    transform: translateX(calc(-1 * var(--panel-width)));
+    border-right: 1px solid var(--border-color);
+}
+
+#right-panel {
+    right: 0;
+    transform: translateX(var(--panel-width));
+    border-left: 1px solid var(--border-color);
+}
+
+#left-panel.open { transform: translateX(0); }
+#right-panel.open { transform: translateX(0); }
+
+.panel-handle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background-color: var(--bg-hover);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.panel-handle:hover {
+    background-color: var(--highlight-blue);
+    color: white;
+}
+
+#left-panel-handle {
+    right: -20px;
+    border-radius: 0 5px 5px 0;
+}
+
+#right-panel-handle {
+    left: -20px;
+    border-radius: 5px 0 0 5px;
+}
+
+.panel-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-section {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+.panel-section:last-child { border-bottom: none; }
+
+.panel-content h4 {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.panel-controls {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.panel-controls input[type="search"] {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 5px 8px;
+    border-radius: 3px;
+}
+
+/* --- LEFT PANEL: ASSEMBLY & PROPERTIES --- */
+#assembly-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    height: 250px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+#assembly-tree li {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+}
+
+#assembly-tree li:hover { background-color: var(--bg-hover); }
+#assembly-tree li.selected { background-color: var(--highlight-blue); color: var(--bg-main); }
+#assembly-tree ul { list-style: none; padding-left: 20px; }
+.icon-assembly::before { content: '📁'; margin-right: 5px; }
+.icon-part::before { content: '🧊'; margin-right: 5px; }
+
+#properties-content .prop-group { margin-bottom: 10px; }
+#properties-content label { display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+#properties-content input { width: calc(100% - 12px); background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); padding: 5px; border-radius: 3px; }
+.placeholder { font-style: italic; color: var(--text-secondary); }
+
+/* --- RIGHT PANEL: TABS & CONTENT --- */
+.tab-bar { display: flex; border-bottom: 1px solid var(--border-color); }
+.tab-button { flex: 1; background: none; border: none; color: var(--text-secondary); padding: 10px; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; }
+.tab-button:hover { color: var(--text-primary); }
+.tab-button.active { color: var(--highlight-blue); border-bottom-color: var(--highlight-blue); }
+
+.tab-content { display: none; padding: 15px; overflow-y: auto; flex-grow: 1; }
+.tab-content.active { display: block; }
+
+#selection-info-content button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+#selection-info-content button:hover { border-color: var(--highlight-blue); }
+
+#assistant-workspace { display: flex; flex-direction: column; height: 100%; }
+#assistant-output-log { flex-grow: 1; background-color: #1c2025; font-family: var(--font-mono); font-size: 12px; padding: 8px; overflow-y: auto; margin-bottom: 10px; border-radius: 3px; white-space: pre-wrap; }
+#assistant-workspace-input { height: 100px; background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px; font-family: var(--font-mono); margin-bottom: 10px; }
+#assistant-workspace-execute { background-color: var(--highlight-orange); color: var(--bg-main); border: none; padding: 8px; font-weight: bold; cursor: pointer; }
+
+#telemetry-log { height: calc(100vh - 200px); overflow-y: scroll; background-color: #1c2025; font-family: var(--font-mono); font-size: 11px; padding: 5px; white-space: pre; }
+#telemetry-log div { padding: 2px 5px; border-bottom: 1px solid #2a2f37; }
+#telemetry-log .UI { color: var(--highlight-blue); }
+#telemetry-log .API { color: var(--highlight-orange); }
+#telemetry-log .ENGINE { color: var(--highlight-green); }
+#telemetry-log .ERROR { color: var(--highlight-red); background-color: #4d2d30; }
+#telemetry-log .WARNING { color: #ffd700; }
+#telemetry-log .PERF { color: #c678dd; }
+
+/* --- BOTTOM STATUS BAR --- */
+#bottom-status-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background-color: rgba(33, 37, 43, 0.8);
+    border-top: 1px solid var(--border-color);
+    z-index: var(--z-statusbar);
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    gap: 20px;
+}
+#bottom-status-bar .spacer { flex-grow: 1; }
+#status-message { color: var(--text-primary); }
+
+/* --- VIEW CUBE --- */
+#view-cube {
+    position: absolute;
+    top: calc(var(--toolbar-height-collapsed) + 15px);
+    right: 15px;
+    width: 80px;
+    height: 80px;
+    perspective: 400px;
+    z-index: var(--z-viewcube);
+    transition: top 0.3s ease-in-out;
+}
+
+#top-toolbar-system.open + #viewport-container #view-cube {
+    top: calc(var(--toolbar-height-expanded) + 15px);
+}
+
+/* This is a placeholder for a real JS-driven view cube. */
+#view-cube::before {
+    content: 'VIEW';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(33, 37, 43, 0.5);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-weight: bold;
+    cursor: pointer;
+}
+#view-cube:hover::before {
+    background-color: var(--highlight-blue);
+    color: white;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    :root {
+        --panel-width: 280px;
+    }
+    .toolbar-row {
+        flex-wrap: wrap;
+    }
+    .toolbar-label {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+}
+
+
+/* ============================================================
+   MAGICXBF — SIMPLE GUARANTEED SLIDING TOOLBAR
+   ============================================================ */
+
+
+
+/* OPEN = DROP DOWN */
+
+
+
+/* HANDLE */
+
+#top-toolbar-handle {
+    position: absolute !important;
+
+    left: 0 !important;
+    right: 0 !important;
+    bottom: -40px !important;
+
+    height: 40px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #3a4049 !important;
+
+    color: #abb2bf !important;
+
+    cursor: pointer !important;
+
+    z-index: 100000 !important;
+
+    border-bottom: 1px solid #454c59 !important;
+}
+
+/* CONTENT */
+
+#top-toolbar-content {
+    position: absolute !important;
+
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+
+    height: 360px !important;
+
+    padding: 10px !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+
+    overflow: visible !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ROWS */
+
+#top-toolbar-content .toolbar-row {
+    display: flex !important;
+    align-items: center !important;
+
+    min-height: 28px !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* BUTTONS */
+
+#top-toolbar-content button {
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    pointer-events: auto !important;
+}
+
+/* ASSISTANT */
+
+#engineering-assistant-bar {
+    display: flex !important;
+    align-items: center !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* KEEP VIEWPORT UNDER IT */
+
+#viewport-container {
+    z-index: 1 !important;
+}
+
+/* ============================================================
+   END SIMPLE TOOLBAR
+   ============================================================ */
+
+
+/* ============================================================
+   MAGICXBF2 — SIMPLE SLIDING TOOLBAR
+   One state. One class. No transform tricks.
+   ============================================================ */
+
+
+
+/*
+   OPEN:
+   The toolbar simply grows downward.
+   No translateY.
+   No calculated negative height.
+*/
+
+
+#top-toolbar-handle {
+    position: relative !important;
+
+    width: 100% !important;
+    height: var(--toolbar-height-collapsed) !important;
+    min-height: var(--toolbar-height-collapsed) !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    cursor: pointer !important;
+    user-select: none !important;
+
+    background-color: #3a4049 !important;
+
+    z-index: 1002 !important;
+}
+
+#top-toolbar-handle:hover {
+    background-color: var(--highlight-blue) !important;
+    color: var(--bg-main) !important;
+}
+
+#top-toolbar-content {
+    position: relative !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    padding: 10px !important;
+    box-sizing: border-box !important;
+
+    gap: 8px !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    z-index: 1001 !important;
+}
+
+#top-toolbar-content .toolbar-row {
+    display: flex !important;
+    align-items: center !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    flex-shrink: 0 !important;
+}
+
+#top-toolbar-content button,
+#top-toolbar-content input {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#engineering-assistant-bar {
+    display: flex !important;
+    flex-shrink: 0 !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Keep viewport underneath the toolbar. */
+#viewport-container {
+    z-index: 1 !important;
+}
+
+/* Toolbar always wins the stacking contest. */
+
+/* ============================================================
+   MAGICXBF SIMPLE SLIDE-DOWN TOOLBAR
+   One state. One animation. Nothing clever.
+   ============================================================ */
+
+#top-toolbar-system {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 1000;
+
+    background-color: var(--bg-toolbar);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+
+    overflow: hidden;
+
+    /* Closed: only the 40px handle remains visible. */
+    max-height: var(--toolbar-height-collapsed);
+
+    transition: max-height 0.3s ease-in-out;
+}
+
+#top-toolbar-system.open {
+    /* Open: let the actual content determine the height. */
+    max-height: 100vh;
+}
+
+#top-toolbar-handle {
+    height: var(--toolbar-height-collapsed);
+    min-height: var(--toolbar-height-collapsed);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    user-select: none;
+
+    background-color: #3a4049;
+
+    position: relative;
+    z-index: 1001;
+}
+
+#top-toolbar-handle:hover {
+    background-color: var(--highlight-blue);
+    color: var(--bg-main);
+}
+
+#top-toolbar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 10px;
+
+    position: relative;
+    z-index: 1000;
+}
+
+#top-toolbar-content .toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    visibility: visible;
+    opacity: 1;
+}
+
+#engineering-assistant-bar {
+    display: flex;
+    align-items: center;
+}
+
+
+
+
+
+/* ============================================================
+   MAGICXBF FINAL TOOLBAR + 16-WAY ORIENTATION GIZMO
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   TOOLBAR
+   ------------------------------------------------------------ */
+
+#top-toolbar-system {
+    position: absolute !important;
+
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+
+    z-index: 1000 !important;
+
+    transform: none !important;
+
+    background: var(--bg-toolbar) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    box-shadow: 0 3px 14px rgba(0,0,0,0.38) !important;
+}
+
+/*
+   THE HANDLE IS ALWAYS THERE.
+*/
+#top-toolbar-handle {
+    position: relative !important;
+
+    height: 40px !important;
+    min-height: 40px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    z-index: 1002 !important;
+
+    cursor: pointer !important;
+    user-select: none !important;
+
+    background: #3a4049 !important;
+}
+
+/*
+   CLOSED STATE.
+   Only the 40px handle is visible.
+*/
+#top-toolbar-content {
+    display: flex !important;
+    flex-direction: column !important;
+
+    box-sizing: border-box !important;
+
+    max-height: 0 !important;
+    height: auto !important;
+
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    opacity: 0 !important;
+
+    transition:
+        max-height 0.30s ease-out,
+        opacity 0.18s ease-out,
+        padding 0.30s ease-out !important;
+}
+
+/*
+   OPEN STATE.
+   The complete toolbar drops below TOOLS.
+*/
+#top-toolbar-system.open #top-toolbar-content {
+    max-height: 900px !important;
+
+    padding: 10px !important;
+
+    opacity: 1 !important;
+
+    overflow: visible !important;
+}
+
+#top-toolbar-content .toolbar-row {
+    display: flex !important;
+    align-items: center !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#top-toolbar-content button,
+#top-toolbar-content input {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Assistant is part of the toolbar. */
+#engineering-assistant-bar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/*
+   Make the handle visually communicate its state.
+*/
+#top-toolbar-system:not(.open) #top-toolbar-handle::after {
+    content: '▼';
+    margin-left: 10px;
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+#top-toolbar-system.open #top-toolbar-handle::after {
+    content: '▲';
+    margin-left: 10px;
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+
+/* ------------------------------------------------------------
+   16-WAY ORIENTATION GIZMO
+   ------------------------------------------------------------ */
+
+#view-cube {
+    position: absolute !important;
+
+    top: 58px !important;
+    right: 18px !important;
+
+    width: 118px !important;
+    height: 142px !important;
+
+    z-index: 950 !important;
+
+    perspective: 650px !important;
+
+    pointer-events: none !important;
+}
+
+.orientation-gizmo {
+    position: relative;
+
+    width: 118px;
+    height: 142px;
+
+    transform-style: preserve-3d;
+}
+
+/* Central cube */
+
+.gizmo-cube {
+    position: absolute;
+
+    left: 20px;
+    top: 10px;
+
+    width: 78px;
+    height: 78px;
+
+    transform-style: preserve-3d;
+
+    transform:
+        rotateX(-22deg)
+        rotateY(35deg);
+}
+
+/* Six primary cube faces */
+
+.gizmo-face {
+    position: absolute;
+
+    width: 78px;
+    height: 78px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255,255,255,0.42);
+    border-radius: 3px;
+
+    background: rgba(45,51,61,0.94);
+
+    color: var(--text-primary);
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+
+    backface-visibility: visible;
+
+    transition:
+        background 0.12s ease,
+        color 0.12s ease,
+        border-color 0.12s ease;
+}
+
+.gizmo-face:hover {
+    background: var(--highlight-blue);
+    color: var(--bg-main);
+    border-color: white;
+}
+
+.face-front {
+    transform: translateZ(39px);
+}
+
+.face-back {
+    transform: rotateY(180deg) translateZ(39px);
+}
+
+.face-right {
+    transform: rotateY(90deg) translateZ(39px);
+}
+
+.face-left {
+    transform: rotateY(-90deg) translateZ(39px);
+}
+
+.face-top {
+    transform: rotateX(90deg) translateZ(39px);
+}
+
+.face-bottom {
+    transform: rotateX(-90deg) translateZ(39px);
+}
+
+
+/* ------------------------------------------------------------
+   ORIENTATION RING
+   Eight intermediate directions surrounding the cube.
+   ------------------------------------------------------------ */
+
+.gizmo-ring {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 118px;
+    height: 104px;
+
+    pointer-events: none;
+}
+
+.gizmo-point {
+    position: absolute;
+
+    width: 22px;
+    height: 20px;
+
+    padding: 0;
+
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+
+    background: rgba(33,37,43,0.92);
+
+    color: var(--text-secondary);
+
+    font-size: 8px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+
+    transition:
+        background 0.12s ease,
+        color 0.12s ease;
+}
+
+.gizmo-point:hover {
+    background: var(--highlight-blue);
+    color: var(--bg-main);
+}
+
+/* Eight positions */
+
+.p0 { left: 48px; top: 0; }
+.p1 { left: 82px; top: 8px; }
+.p2 { left: 94px; top: 39px; }
+.p3 { left: 84px; top: 72px; }
+
+.p4 { left: 48px; top: 82px; }
+.p5 { left: 12px; top: 72px; }
+.p6 { left: 2px; top: 39px; }
+.p7 { left: 12px; top: 8px; }
+
+
+/* ------------------------------------------------------------
+   FOUR DIAGONAL ORIENTATION BUTTONS
+   ------------------------------------------------------------ */
+
+.gizmo-corner-buttons {
+    position: absolute;
+
+    left: 22px;
+    top: 94px;
+
+    width: 74px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 3px;
+
+    pointer-events: none;
+}
+
+.gizmo-corner-buttons button {
+    height: 18px;
+
+    padding: 0;
+
+    border: 1px solid var(--border-color);
+    border-radius: 2px;
+
+    background: rgba(33,37,43,0.90);
+
+    color: var(--text-secondary);
+
+    font-size: 8px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+}
+
+.gizmo-corner-buttons button:hover {
+    background: var(--highlight-blue);
+    color: var(--bg-main);
+}
+
+
+/* Home */
+
+.gizmo-home {
+    position: absolute;
+
+    left: 47px;
+    top: 122px;
+
+    width: 26px;
+    height: 18px;
+
+    padding: 0;
+
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+
+    background: rgba(33,37,43,0.94);
+
+    color: var(--text-secondary);
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+}
+
+.gizmo-home:hover {
+    background: var(--highlight-blue);
+    color: var(--bg-main);
+}
+
+
+/* ------------------------------------------------------------
+   LAYERING
+   ------------------------------------------------------------ */
+
+#viewport-container {
+    z-index: 1 !important;
+}
+
+#top-toolbar-system {
+    z-index: 1000 !important;
+}
+
+#left-panel,
+#right-panel {
+    z-index: 900 !important;
+}
+
